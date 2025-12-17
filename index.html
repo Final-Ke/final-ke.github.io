@@ -1,8 +1,447 @@
-<html>
- <head>
-    <title>コナンのポートフォリオ</title>
- </head>
- <body>
-    123
- </body>
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>K的音频作品集</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #05070c;
+        --bg-soft: #0c111c;
+        --accent: #66f0ff;
+        --accent-2: #ffa7f7;
+        --text: #eef2ff;
+        --muted: #8a92b2;
+        --card: rgba(255, 255, 255, 0.04);
+        --border: rgba(255, 255, 255, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 20% 20%, rgba(255, 167, 247, 0.15), transparent 35%),
+          radial-gradient(circle at 80% 0%, rgba(102, 240, 255, 0.12), transparent 40%),
+          var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        padding: 28px clamp(20px, 4vw, 80px);
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .brand-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .brand-role {
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .lang-switch {
+        display: flex;
+        gap: 10px;
+      }
+
+      .lang-switch button {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 8px 18px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background 0.2s, border 0.2s, color 0.2s;
+      }
+
+      .lang-switch button.active {
+        background: var(--text);
+        color: var(--bg);
+        border-color: var(--text);
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 clamp(20px, 4vw, 80px) 80px;
+      }
+
+      .hero {
+        padding: 80px 0 60px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        align-items: center;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.3rem, 5vw, 3.6rem);
+        margin: 0 0 20px;
+      }
+
+      .hero p {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--muted);
+        margin-bottom: 24px;
+      }
+
+      .hero-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 26px;
+        border-radius: 999px;
+        border: none;
+        font-size: 1rem;
+        font-weight: 500;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #03131a;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: clamp(24px, 5vw, 38px);
+        margin-bottom: 30px;
+      }
+
+      .panel h2 {
+        margin-top: 0;
+        font-size: 1.9rem;
+      }
+
+      .panel p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .specialties {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      .chip {
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .chip h3 {
+        margin-top: 0;
+        font-size: 1.1rem;
+      }
+
+      .chip p {
+        margin-bottom: 0;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .portfolio-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 30px;
+      }
+
+      .audio-card {
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 22px;
+        background: rgba(255, 255, 255, 0.02);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .audio-card h3 {
+        margin: 0;
+      }
+
+      .audio-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      audio {
+        width: 100%;
+      }
+
+      .listening-note {
+        border-left: 3px solid var(--accent);
+        padding-left: 18px;
+      }
+
+      .contact-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        background: linear-gradient(135deg, rgba(102, 240, 255, 0.12), rgba(255, 167, 247, 0.08));
+      }
+
+      .contact-panel a {
+        align-self: flex-start;
+        text-decoration: none;
+        color: var(--bg);
+        font-weight: 600;
+        background: var(--text);
+        padding: 12px 24px;
+        border-radius: 999px;
+      }
+
+      @media (max-width: 600px) {
+        header {
+          gap: 18px;
+        }
+
+        .lang-switch {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="brand-name" data-i18n="brandName">K音频实验室</span>
+        <span class="brand-role" data-i18n="brandRole">沉浸式音频工程师</span>
+      </div>
+      <div class="lang-switch">
+        <button data-lang="zh" class="active">中文</button>
+        <button data-lang="ja">日本語</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero panel">
+        <div>
+          <h1 data-i18n="heroTitle">雕刻电影级声音</h1>
+          <p data-i18n="heroSubtitle">
+            我是K，驻东京的音频工程师，将模拟质感与空间混音结合，为电影、游戏和装置艺术打造声音。
+          </p>
+          <a class="hero-cta" href="#portfolio" data-i18n="heroCTA">试听代表作</a>
+        </div>
+        <div class="listening-note">
+          <p data-i18n="listeningLead">
+            我关注余量、瞬态细节与情绪节奏的平衡。耳机或全频系统体验最佳。
+          </p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="specialtiesHeading">我的声音雕塑</h2>
+        <p data-i18n="specialtiesExplain">从精致拟音到震撼环绕，我让情绪与声音同步呼吸。</p>
+        <div class="specialties">
+          <article class="chip">
+            <h3 data-i18n="specialty1Title">空间混音</h3>
+            <p data-i18n="specialty1Body">Dolby Atmos / 7.1 声像设计，精准定位包裹听众。</p>
+          </article>
+          <article class="chip">
+            <h3 data-i18n="specialty2Title">混合母带</h3>
+            <p data-i18n="specialty2Body">模拟染色叠加数字控制，兼容各大流媒体标准。</p>
+          </article>
+          <article class="chip">
+            <h3 data-i18n="specialty3Title">现场采录</h3>
+            <p data-i18n="specialty3Body">演唱会、戏剧与艺术装置的多轨录音与快速交付。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" id="portfolio">
+        <h2 data-i18n="portfolioHeading">近期项目</h2>
+        <p data-i18n="portfolioSubheading">精选片段，建议佩戴耳机。</p>
+        <div class="portfolio-grid">
+          <article class="audio-card">
+            <h3 data-i18n="project1Title">霓虹黑色预告</h3>
+            <p data-i18n="project1Desc">金属打击与低频气压交织的Atmos混音。</p>
+            <audio controls preload="none">
+              <source src="https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav" type="audio/wav" />
+              Your browser does not support the audio element.
+            </audio>
+          </article>
+          <article class="audio-card">
+            <h3 data-i18n="project2Title">独立乐队现场</h3>
+            <p data-i18n="project2Desc">48轨录音，混制成沉浸式立体声。</p>
+            <audio controls preload="none">
+              <source src="https://samplelib.com/lib/preview/mp3/sample-9s.mp3" type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+          </article>
+          <article class="audio-card">
+            <h3 data-i18n="project3Title">互动装置声景</h3>
+            <p data-i18n="project3Desc">可根据观众动作生成变化的环境声。</p>
+            <audio controls preload="none">
+              <source src="https://samplelib.com/lib/preview/mp3/sample-3s.mp3" type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel contact-panel">
+        <h2 data-i18n="contactHeading">与我合作</h2>
+        <p data-i18n="contactBody">接受远程协作、日本各地驻场与完整后期流程。</p>
+        <a href="mailto:hello@kaudio.studio" data-i18n="contactCTA">预约沟通</a>
+      </section>
+    </main>
+
+    <script>
+      const translations = {
+        zh: {
+          pageTitle: "K的音频作品集",
+          brandName: "K音频实验室",
+          brandRole: "沉浸式音频工程师",
+          heroTitle: "雕刻电影级声音",
+          heroSubtitle: "我是K，驻东京的音频工程师，将模拟质感与空间混音结合，为电影、游戏和装置艺术打造声音。",
+          heroCTA: "试听代表作",
+          specialtiesHeading: "我的声音雕塑",
+          specialtiesExplain: "从精致拟音到震撼环绕，我让情绪与声音同步呼吸。",
+          specialty1Title: "空间混音",
+          specialty1Body: "Dolby Atmos / 7.1 声像设计，精准定位包裹听众。",
+          specialty2Title: "混合母带",
+          specialty2Body: "模拟染色叠加数字控制，兼容各大流媒体标准。",
+          specialty3Title: "现场采录",
+          specialty3Body: "演唱会、戏剧与艺术装置的多轨录音与快速交付。",
+          portfolioHeading: "近期项目",
+          portfolioSubheading: "精选片段，建议佩戴耳机。",
+          project1Title: "霓虹黑色预告",
+          project1Desc: "金属打击与低频气压交织的Atmos混音。",
+          project2Title: "独立乐队现场",
+          project2Desc: "48轨录音，混制成沉浸式立体声。",
+          project3Title: "互动装置声景",
+          project3Desc: "可根据观众动作生成变化的环境声。",
+          listeningLead: "我关注余量、瞬态细节与情绪节奏的平衡。耳机或全频系统体验最佳。",
+          contactHeading: "与我合作",
+          contactBody: "接受远程协作、日本各地驻场与完整后期流程。",
+          contactCTA: "预约沟通"
+        },
+        ja: {
+          pageTitle: "Kのオーディオポートフォリオ",
+          brandName: "K Audio Lab",
+          brandRole: "イマーシブ・オーディオエンジニア",
+          heroTitle: "映画級サウンドを彫刻する",
+          heroSubtitle: "東京拠点のエンジニアKです。アナログの温度感と空間ミックスを融合し、映画・ゲーム・インスタレーションの世界観を支えます。",
+          heroCTA: "作品を聴く",
+          specialtiesHeading: "音で形づくるもの",
+          specialtiesExplain: "繊細なフォーリーから轟くサラウンドまで、感情に寄り添うサウンドを設計します。",
+          specialty1Title: "空間ミキシング",
+          specialty1Body: "Dolby Atmos / 7.1でリスナーを正確な定位に包み込みます。",
+          specialty2Title: "ハイブリッドマスタリング",
+          specialty2Body: "アナログの色づけとデジタル精度で配信規格に最適化。",
+          specialty3Title: "ライブレコーディング",
+          specialty3Body: "コンサート、演劇、体験型アートのマルチトラック収録。",
+          portfolioHeading: "最新セッション",
+          portfolioSubheading: "厳選したキューとミックス。ヘッドフォン推奨。",
+          project1Title: "ネオノワール予告",
+          project1Desc: "金属パーカッションとローエンドで緊張感を演出するAtmos。",
+          project2Title: "インディーライブ",
+          project2Desc: "48トラック収録を没入感あるステレオへ仕上げ。",
+          project3Title: "インタラクティブ・インスタレーション",
+          project3Desc: "来場者の動きに反応する生成サウンド。",
+          listeningLead: "ヘッドルーム、トランジェント、感情の呼吸を常に意識。",
+          contactHeading: "一緒に作りましょう",
+          contactBody: "リモート案件、日本各地のオンサイト、フルポストまで対応可能。",
+          contactCTA: "相談する"
+        },
+        en: {
+          pageTitle: "K's Audio Portfolio",
+          brandName: "K Audio Lab",
+          brandRole: "Immersive Audio Engineer",
+          heroTitle: "Crafting Cinematic Soundscapes",
+          heroSubtitle: "I'm K, a Tokyo-based audio engineer blending analog warmth with spatial mixing for film, games, and installations.",
+          heroCTA: "Listen to my work",
+          specialtiesHeading: "What I Shape",
+          specialtiesExplain: "From delicate Foley to explosive surround mixes, I engineer narratives you can feel.",
+          specialty1Title: "Spatial Mixing",
+          specialty1Body: "Dolby Atmos / 7.1 design that wraps audiences in precise localization.",
+          specialty2Title: "Hybrid Mastering",
+          specialty2Body: "Analog coloration plus surgical digital control for streaming platforms.",
+          specialty3Title: "Live Capture",
+          specialty3Body: "On-site multitrack recording for concerts, theatre, and experiential art.",
+          portfolioHeading: "Recent Sessions",
+          portfolioSubheading: "Selected cues and mixes — headphones recommended.",
+          project1Title: "Neo Noir Trailer",
+          project1Desc: "Atmos teaser with metallic percussion and low-end pressure.",
+          project2Title: "Indie Concert Live",
+          project2Desc: "48-track capture mixed down to immersive stereo.",
+          project3Title: "Interactive Installation",
+          project3Desc: "Generative ambience responding to visitor movement.",
+          listeningLead: "Each project balances headroom, transient detail, and emotional pacing.",
+          contactHeading: "Let's Create Together",
+          contactBody: "Available for remote collaborations, on-site sessions across Japan, and full post pipelines.",
+          contactCTA: "Book a call"
+        }
+      };
+
+      const langButtons = document.querySelectorAll("[data-lang]");
+      const translatableElements = document.querySelectorAll("[data-i18n]");
+
+      function setLanguage(lang) {
+        const pack = translations[lang];
+        if (!pack) return;
+
+        document.documentElement.lang = lang === "zh" ? "zh-Hans" : lang === "ja" ? "ja" : "en";
+        document.title = pack.pageTitle;
+
+        translatableElements.forEach((node) => {
+          const key = node.dataset.i18n;
+          if (pack[key]) {
+            node.textContent = pack[key];
+          }
+        });
+
+        langButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.lang === lang));
+        localStorage.setItem("portfolioLang", lang);
+      }
+
+      langButtons.forEach((btn) => {
+        btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+      });
+
+      const savedLang = localStorage.getItem("portfolioLang") || "zh";
+      setLanguage(savedLang);
+    </script>
+  </body>
 </html>
