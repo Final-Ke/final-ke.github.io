@@ -21,6 +21,9 @@
         --border: rgba(255, 245, 230, 0.18);
         --card: rgba(255, 245, 230, 0.06);
         --glow: rgba(246, 211, 101, 0.2);
+        --glow-x: 50%;
+        --glow-y: 50%;
+        --glow-intensity: 0.35;
       }
 
       * {
@@ -36,6 +39,22 @@
           radial-gradient(circle at 10% 20%, rgba(253, 160, 133, 0.22), transparent 40%), var(--bg);
         position: relative;
         overflow-x: hidden;
+      }
+
+      .soft-glow {
+        position: fixed;
+        inset: -15%;
+        background: radial-gradient(
+          circle at var(--glow-x) var(--glow-y),
+          rgba(246, 211, 101, calc(var(--glow-intensity) + 0.05)),
+          rgba(253, 160, 133, calc(var(--glow-intensity) - 0.08)) 30%,
+          rgba(6, 7, 14, 0) 65%
+        );
+        opacity: 0.55;
+        filter: blur(10px);
+        z-index: 1;
+        pointer-events: none;
+        animation: glowPulse 18s ease-in-out infinite;
       }
 
       .orb {
@@ -79,6 +98,16 @@
         }
         50% {
           transform: translateY(18px);
+        }
+      }
+
+      @keyframes glowPulse {
+        0%,
+        100% {
+          opacity: 0.45;
+        }
+        50% {
+          opacity: 0.7;
         }
       }
 
@@ -311,6 +340,7 @@
     </style>
   </head>
   <body>
+    <div class="soft-glow" id="softGlow"></div>
     <div class="orb orb-one"></div>
     <div class="orb orb-two"></div>
     <div class="orb orb-three"></div>
@@ -358,7 +388,7 @@
 
         <audio id="greetingAudio" controls preload="none" crossorigin="anonymous">
           <source
-            src="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Newyear2026.mp3"
+            src="https://github.com/Final-Ke/final-ke.github.io/blob/main/Newyear2026.mp3"
             type="audio/mpeg"
           />
           Your browser does not support the audio element.
@@ -367,7 +397,7 @@
         <div class="actions">
           <a
             class="button primary"
-            href="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Newyear2026.mp3"
+            href="https://github.com/Final-Ke/final-ke.github.io/blob/main/Newyear2026.mp3"
             download
             data-i18n="downloadBtn"
             >下载音频</a
@@ -468,6 +498,8 @@
       let rafId;
       let canvasSize = { width: 0, height: 0 };
       let pointer = { x: 0.5, y: 0.5 };
+      let glowTarget = { x: 0.5, y: 0.5 };
+      let glowCurrent = { x: 0.5, y: 0.5 };
 
       function setLanguage(lang) {
         const pack = translations[lang];
@@ -586,6 +618,11 @@
         }
         ctx.stroke();
 
+        glowCurrent.x += (glowTarget.x - glowCurrent.x) * 0.03;
+        glowCurrent.y += (glowTarget.y - glowCurrent.y) * 0.03;
+        document.documentElement.style.setProperty("--glow-x", `${(glowCurrent.x * 100).toFixed(2)}%`);
+        document.documentElement.style.setProperty("--glow-y", `${(glowCurrent.y * 100).toFixed(2)}%`);
+
         rafId = requestAnimationFrame(drawVisualizer);
       }
 
@@ -595,6 +632,16 @@
           x: Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1),
           y: Math.min(Math.max((event.clientY - rect.top) / rect.height, 0), 1)
         };
+      });
+
+      window.addEventListener("pointermove", (event) => {
+        const x = Math.min(Math.max(event.clientX / window.innerWidth, 0), 1);
+        const y = Math.min(Math.max(event.clientY / window.innerHeight, 0), 1);
+        glowTarget = { x, y };
+      });
+
+      window.addEventListener("pointerleave", () => {
+        glowTarget = { x: 0.5, y: 0.5 };
       });
 
       vizToggle.addEventListener("click", () => {
