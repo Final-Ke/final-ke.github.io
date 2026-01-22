@@ -7,19 +7,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=Syne:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
         color-scheme: dark;
-        --bg: #05060c;
+        --bg: #06070e;
         --accent: #f6d365;
         --accent-2: #fda085;
-        --text: #fdf5e6;
-        --muted: rgba(253, 245, 230, 0.7);
-        --border: rgba(253, 245, 230, 0.18);
-        --card: rgba(253, 245, 230, 0.06);
+        --text: #fff5e6;
+        --muted: rgba(255, 245, 230, 0.7);
+        --border: rgba(255, 245, 230, 0.18);
+        --card: rgba(255, 245, 230, 0.06);
+        --glow: rgba(246, 211, 101, 0.2);
       }
 
       * {
@@ -29,10 +30,56 @@
       body {
         margin: 0;
         min-height: 100vh;
-        font-family: "Space Grotesk", "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: "Manrope", "Helvetica Neue", sans-serif;
         color: var(--text);
         background: radial-gradient(circle at top right, rgba(246, 211, 101, 0.18), transparent 45%),
-          radial-gradient(circle at 10% 20%, rgba(253, 160, 133, 0.2), transparent 40%), var(--bg);
+          radial-gradient(circle at 10% 20%, rgba(253, 160, 133, 0.22), transparent 40%), var(--bg);
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      .orb {
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        filter: blur(40px);
+        opacity: 0.5;
+        z-index: 0;
+        animation: float 10s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      .orb-one {
+        background: rgba(246, 211, 101, 0.35);
+        top: -80px;
+        right: -80px;
+      }
+
+      .orb-two {
+        background: rgba(253, 160, 133, 0.3);
+        bottom: -120px;
+        left: -60px;
+        animation-delay: -3s;
+      }
+
+      .orb-three {
+        background: rgba(255, 255, 255, 0.1);
+        top: 45%;
+        left: 60%;
+        width: 220px;
+        height: 220px;
+        animation-delay: -6s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(18px);
+        }
       }
 
       header {
@@ -41,10 +88,13 @@
         flex-wrap: wrap;
         justify-content: space-between;
         gap: 16px;
+        position: relative;
+        z-index: 2;
       }
 
       a {
         color: inherit;
+        text-decoration: none;
       }
 
       .lang-switch {
@@ -68,26 +118,37 @@
       }
 
       main {
-        max-width: 960px;
+        max-width: 980px;
         margin: 0 auto;
         padding: 0 clamp(20px, 5vw, 90px) 80px;
         display: flex;
         flex-direction: column;
         gap: 32px;
+        position: relative;
+        z-index: 2;
       }
 
       .hero {
         border: 1px solid var(--border);
-        border-radius: 30px;
+        border-radius: 32px;
         padding: clamp(24px, 5vw, 60px);
-        background: linear-gradient(140deg, rgba(246, 211, 101, 0.2), rgba(253, 160, 133, 0.12)), var(--card);
+        background: linear-gradient(140deg, rgba(246, 211, 101, 0.25), rgba(253, 160, 133, 0.14)), var(--card);
         display: grid;
         gap: 16px;
+        animation: fadeUp 0.8s ease forwards;
+      }
+
+      .hero p:first-child {
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.85rem;
+        color: var(--muted);
       }
 
       .hero h1 {
         margin: 0;
-        font-size: clamp(2.2rem, 5vw, 3.5rem);
+        font-family: "Syne", "Helvetica Neue", sans-serif;
+        font-size: clamp(2.2rem, 5vw, 3.6rem);
       }
 
       .hero p {
@@ -100,23 +161,77 @@
         border: 1px solid var(--border);
         border-radius: 24px;
         padding: 24px;
-        background: var(--card);
+        background: rgba(10, 10, 15, 0.6);
         line-height: 1.8;
         font-size: 1.05rem;
-      }
-
-      audio {
-        width: 100%;
+        animation: fadeUp 0.8s ease forwards;
+        animation-delay: 0.1s;
       }
 
       .audio-card {
         border: 1px solid var(--border);
         border-radius: 24px;
         padding: 24px;
-        background: rgba(0, 0, 0, 0.2);
+        background: rgba(0, 0, 0, 0.35);
         display: flex;
         flex-direction: column;
+        gap: 16px;
+        animation: fadeUp 0.8s ease forwards;
+        animation-delay: 0.2s;
+      }
+
+      .audio-head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .audio-head strong {
+        font-size: 1.2rem;
+      }
+
+      .audio-head p {
+        margin: 6px 0 0;
+        color: var(--muted);
+      }
+
+      .audio-controls {
+        display: flex;
         gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .visualizer {
+        position: relative;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: radial-gradient(circle at center, rgba(246, 211, 101, 0.12), rgba(6, 7, 14, 0.9));
+        min-height: 220px;
+        overflow: hidden;
+      }
+
+      .visualizer canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .viz-overlay {
+        position: absolute;
+        inset: 18px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 0.9rem;
+        pointer-events: none;
+      }
+
+      audio {
+        width: 100%;
+        filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.4));
       }
 
       .actions {
@@ -135,6 +250,8 @@
         font-weight: 600;
         text-decoration: none;
         cursor: pointer;
+        background: none;
+        color: inherit;
       }
 
       .button.primary {
@@ -147,14 +264,57 @@
         color: var(--text);
       }
 
+      .button.ghost {
+        border-color: var(--border);
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px 18px;
+        font-size: 0.85rem;
+      }
+
+      .button.ghost.active {
+        border-color: rgba(246, 211, 101, 0.6);
+        box-shadow: 0 0 20px rgba(246, 211, 101, 0.25);
+      }
+
       footer {
         text-align: center;
         color: var(--muted);
         font-size: 0.85rem;
+        position: relative;
+        z-index: 2;
+        padding-bottom: 30px;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .lang-switch {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .audio-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
       }
     </style>
   </head>
   <body>
+    <div class="orb orb-one"></div>
+    <div class="orb orb-two"></div>
+    <div class="orb orb-three"></div>
+
     <header>
       <a href="index.html" data-i18n="backHome">← 返回入口</a>
       <div class="lang-switch">
@@ -178,17 +338,44 @@
       </section>
 
       <section class="audio-card">
-        <strong data-i18n="audioTitle">声波祝福片段</strong>
-        <p data-i18n="audioDesc">建议佩戴耳机聆听，感受低频与钟鸣的交织。</p>
-        <audio controls preload="none">
-          <source src="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Newyear2026.mp3" type="audio/mpeg" />
+        <div class="audio-head">
+          <div>
+            <strong data-i18n="audioTitle">声波祝福片段</strong>
+            <p data-i18n="audioDesc">建议佩戴耳机聆听，感受低频与钟鸣的交织。</p>
+          </div>
+          <div class="audio-controls">
+            <button class="button ghost" id="vizToggle" data-i18n="vizStart">启动可视化</button>
+            <button class="button ghost active" id="pulseToggle" data-i18n="pulseOn">互动光场：开</button>
+          </div>
+        </div>
+
+        <div class="visualizer" id="visualizer">
+          <canvas id="vizCanvas"></canvas>
+          <div class="viz-overlay">
+            <span data-i18n="vizHint">点击播放并移动鼠标，让声波追随。</span>
+          </div>
+        </div>
+
+        <audio id="greetingAudio" controls preload="none" crossorigin="anonymous">
+          <source
+            src="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Newyear2026.mp3"
+            type="audio/mpeg"
+          />
           Your browser does not support the audio element.
         </audio>
+
         <div class="actions">
-          <a class="button primary" href="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Newyear2026.mp3" download data-i18n="downloadBtn"
+          <a
+            class="button primary"
+            href="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Newyear2026.mp3"
+            download
+            data-i18n="downloadBtn"
             >下载音频</a
           >
-          <a class="button secondary" href="mailto:xskk1998@gmail.com?subject=2026%20New%20Year" data-i18n="replyBtn"
+          <a
+            class="button secondary"
+            href="mailto:xskk1998@gmail.com?subject=2026%20New%20Year"
+            data-i18n="replyBtn"
             >回传你的频率</a
           >
         </div>
@@ -209,6 +396,12 @@
             "愿2026年的每一次启动都像温暖的渐强：音量缓慢推开，旋钮稳重而果敢。愿你在忙碌里保持一段静默，让灵感像低频一样渗透；愿你最终的母带足够响亮，却依旧保留柔软的动态。",
           audioTitle: "声波祝福片段",
           audioDesc: "建议佩戴耳机聆听，感受低频与钟鸣的交织。",
+          vizStart: "启动可视化",
+          vizReady: "可视化已启动",
+          vizFail: "可视化不可用",
+          pulseOn: "互动光场：开",
+          pulseOff: "互动光场：关",
+          vizHint: "点击播放并移动鼠标，让声波追随。",
           downloadBtn: "下载音频",
           replyBtn: "回传你的频率",
           footer: "K Audio Lab · 向2026举杯，愿每个频段都有祝福"
@@ -223,6 +416,12 @@
             "2026年のスタートが穏やかなクレッシェンドのようでありますように。忙しさの中にも静寂を持ち、低域のようにアイデアが染み込む時間を。最終マスターは力強く、それでいて柔らかなダイナミクスを保っていますように。",
           audioTitle: "サウンドブレッシング",
           audioDesc: "ヘッドフォンでの試聴がおすすめ。低域と鐘の響きをお楽しみください。",
+          vizStart: "可視化を起動",
+          vizReady: "可視化が有効",
+          vizFail: "可視化を利用できません",
+          pulseOn: "インタラクティブ: オン",
+          pulseOff: "インタラクティブ: オフ",
+          vizHint: "再生しながらカーソルを動かすと光が追いかけます。",
           downloadBtn: "音源をダウンロード",
           replyBtn: "あなたの周波数を返す",
           footer: "K Audio Lab · 2026年へ、すべての帯域に祝福を"
@@ -238,6 +437,12 @@
             "May every 2026 launch feel like a gentle crescendo: faders rising with calm, knobs moving with intent. May you carve out silence inside the rush so inspiration seeps in like low end; may your final masters stay bold yet tender in dynamics.",
           audioTitle: "Sonic blessing excerpt",
           audioDesc: "Headphones recommended to feel the low end braided with chimes.",
+          vizStart: "Enable visualizer",
+          vizReady: "Visualizer enabled",
+          vizFail: "Visualizer unavailable",
+          pulseOn: "Interactive glow: On",
+          pulseOff: "Interactive glow: Off",
+          vizHint: "Play the track and move your cursor to steer the light.",
           downloadBtn: "Download audio",
           replyBtn: "Send your own frequency",
           footer: "K Audio Lab · Raising a glass to 2026, blessing every band"
@@ -246,10 +451,28 @@
 
       const langButtons = document.querySelectorAll("[data-lang]");
       const translatableElements = document.querySelectorAll("[data-i18n]");
+      const vizToggle = document.getElementById("vizToggle");
+      const pulseToggle = document.getElementById("pulseToggle");
+      const audio = document.getElementById("greetingAudio");
+      const canvas = document.getElementById("vizCanvas");
+      const visualizer = document.getElementById("visualizer");
+      const ctx = canvas.getContext("2d");
+
+      let currentLang = localStorage.getItem("newYearLang") || "zh";
+      let vizState = "start";
+      let pulseEnabled = true;
+      let audioCtx;
+      let analyser;
+      let dataArray;
+      let source;
+      let rafId;
+      let canvasSize = { width: 0, height: 0 };
+      let pointer = { x: 0.5, y: 0.5 };
 
       function setLanguage(lang) {
         const pack = translations[lang];
         if (!pack) return;
+        currentLang = lang;
         document.documentElement.lang = lang === "zh" ? "zh-Hans" : lang;
         document.title = pack.pageTitle;
         translatableElements.forEach((node) => {
@@ -258,10 +481,154 @@
         });
         langButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.lang === lang));
         localStorage.setItem("newYearLang", lang);
+        updateControlLabels();
       }
 
+      function updateControlLabels() {
+        const pack = translations[currentLang];
+        if (!pack) return;
+        if (vizState === "ready") {
+          vizToggle.textContent = pack.vizReady;
+        } else if (vizState === "fail") {
+          vizToggle.textContent = pack.vizFail;
+        } else {
+          vizToggle.textContent = pack.vizStart;
+        }
+        pulseToggle.textContent = pulseEnabled ? pack.pulseOn : pack.pulseOff;
+      }
+
+      function resizeCanvas() {
+        const rect = visualizer.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        canvasSize = { width: rect.width, height: rect.height };
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function initVisualizer() {
+        if (audioCtx || vizState === "fail") return;
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+          dataArray = new Uint8Array(analyser.frequencyBinCount);
+          source = audioCtx.createMediaElementSource(audio);
+          source.connect(analyser);
+          analyser.connect(audioCtx.destination);
+          vizState = "ready";
+          vizToggle.classList.add("active");
+          updateControlLabels();
+        } catch (error) {
+          vizState = "fail";
+          vizToggle.classList.remove("active");
+          updateControlLabels();
+        }
+      }
+
+      function drawVisualizer(timestamp) {
+        if (!canvasSize.width) return;
+        const { width, height } = canvasSize;
+        ctx.clearRect(0, 0, width, height);
+
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, "rgba(246, 211, 101, 0.9)");
+        gradient.addColorStop(1, "rgba(253, 160, 133, 0.9)");
+
+        let energy = 0.2;
+        if (analyser && dataArray) {
+          analyser.getByteFrequencyData(dataArray);
+          const sum = dataArray.reduce((acc, val) => acc + val, 0);
+          energy = sum / (dataArray.length * 255);
+        } else {
+          energy = 0.25 + 0.1 * Math.sin(timestamp / 700);
+        }
+
+        if (pulseEnabled) {
+          const glowRadius = Math.min(width, height) * (0.25 + energy * 0.35);
+          const glowX = width * pointer.x;
+          const glowY = height * pointer.y;
+          const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, glowRadius);
+          glow.addColorStop(0, `rgba(246, 211, 101, ${0.35 + energy * 0.4})`);
+          glow.addColorStop(1, "rgba(6, 7, 14, 0)");
+          ctx.fillStyle = glow;
+          ctx.fillRect(0, 0, width, height);
+        }
+
+        const bars = 46;
+        const barWidth = width / bars;
+        const scale = 0.8 + pointer.y * 0.5;
+        for (let i = 0; i < bars; i += 1) {
+          let value = energy * 0.6;
+          if (dataArray) {
+            value = dataArray[i] / 255;
+          } else {
+            value = 0.2 + 0.1 * Math.sin(timestamp / 400 + i * 0.5);
+          }
+          const barHeight = Math.max(6, value * height * 0.65 * scale);
+          const x = i * barWidth + barWidth * 0.15;
+          const y = height - barHeight - 12;
+          ctx.fillStyle = gradient;
+          ctx.fillRect(x, y, barWidth * 0.7, barHeight);
+        }
+
+        ctx.strokeStyle = `rgba(255, 245, 230, ${0.25 + energy * 0.35})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const waveAmplitude = 8 + energy * 30;
+        for (let x = 0; x <= width; x += 12) {
+          const y = height * 0.72 + Math.sin(timestamp / 500 + x / 50) * waveAmplitude;
+          if (x === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.stroke();
+
+        rafId = requestAnimationFrame(drawVisualizer);
+      }
+
+      visualizer.addEventListener("pointermove", (event) => {
+        const rect = visualizer.getBoundingClientRect();
+        pointer = {
+          x: Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1),
+          y: Math.min(Math.max((event.clientY - rect.top) / rect.height, 0), 1)
+        };
+      });
+
+      vizToggle.addEventListener("click", () => {
+        if (vizState === "ready") return;
+        initVisualizer();
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+      });
+
+      pulseToggle.addEventListener("click", () => {
+        pulseEnabled = !pulseEnabled;
+        pulseToggle.classList.toggle("active", pulseEnabled);
+        updateControlLabels();
+      });
+
+      audio.addEventListener("play", () => {
+        if (!audioCtx && vizState !== "fail") {
+          initVisualizer();
+        }
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+      });
+
+      resizeCanvas();
+      drawVisualizer(0);
+
       langButtons.forEach((btn) => btn.addEventListener("click", () => setLanguage(btn.dataset.lang)));
-      setLanguage(localStorage.getItem("newYearLang") || "zh");
+      setLanguage(currentLang);
     </script>
   </body>
 </html>
