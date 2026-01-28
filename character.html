@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星音 ミル - Character Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0a0a0f;
+        --text: #f8f8f8;
+        --muted: rgba(248, 248, 248, 0.7);
+        --line: rgba(248, 248, 248, 0.12);
+        --accent: #00ffff;
+        --accent-secondary: #FFD700;
+        --accent-lavender: #E0B0FF;
+        --accent-glow: rgba(0, 255, 255, 0.4);
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* 背景图片 */
+      .background-image {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .background-image::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(10, 10, 15, 0.85) 0%,
+          rgba(10, 10, 15, 0.75) 50%,
+          rgba(10, 10, 15, 0.85) 100%
+        );
+        z-index: 1;
+      }
+
+      .background-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: blur(3px) brightness(0.6);
+      }
+
+      /* 网格覆盖层 */
+      .grid-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 50px 50px;
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      /* 返回主页按钮 */
+      .home-link {
+        position: fixed;
+        top: 24px;
+        left: 24px;
+        z-index: 100;
+        padding: 12px 24px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .home-link::before {
+        content: '←';
+        font-size: 1.2em;
+        transition: transform 0.4s;
+      }
+
+      .home-link:hover {
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        color: var(--bg);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px var(--accent-glow);
+      }
+
+      .home-link:hover::before {
+        transform: translateX(-4px);
+      }
+
+      /* 语言切换 */
+      .lang-switch {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 100;
+        display: flex;
+        gap: 6px;
+        padding: 6px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .lang-switch button {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        padding: 10px 20px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .lang-switch button::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+
+      .lang-switch button span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .lang-switch button.active {
+        color: var(--bg);
+      }
+
+      .lang-switch button.active::before {
+        opacity: 1;
+      }
+
+      /* 主容器 */
+      main {
+        position: relative;
+        z-index: 2;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 100px 24px 60px;
+      }
+
+      /* 角色标题区 */
+      .character-hero {
+        text-align: center;
+        margin-bottom: 80px;
+        animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .character-hero h1 {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: 800;
+        margin-bottom: 16px;
+        background: linear-gradient(135deg, #fff 0%, var(--accent-lavender) 40%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.1;
+      }
+
+      .character-hero .subtitle {
+        font-size: 1.2rem;
+        color: var(--accent-lavender);
+        margin-bottom: 12px;
+        letter-spacing: 0.05em;
+      }
+
+      .character-hero .theme {
+        font-size: 0.95rem;
+        color: var(--muted);
+        font-weight: 300;
+      }
+
+      /* 信息卡片网格 */
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 32px;
+        margin-bottom: 60px;
+      }
+
+      .info-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(30px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+      }
+
+      .info-card:nth-child(1) { animation-delay: 0.1s; }
+      .info-card:nth-child(2) { animation-delay: 0.2s; }
+      .info-card:nth-child(3) { animation-delay: 0.3s; }
+
+      .info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-lavender), var(--accent-secondary));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .info-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--accent);
+        box-shadow: 0 24px 64px rgba(0, 255, 255, 0.2);
+      }
+
+      .info-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      .info-card h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .info-card h2::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 12px var(--accent-glow);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
+      }
+
+      .info-item {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .info-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: var(--accent-lavender);
+        min-width: 100px;
+        font-size: 0.9rem;
+      }
+
+      .info-value {
+        flex: 1;
+        color: var(--text);
+        font-size: 0.95rem;
+      }
+
+      /* 颜色方案卡片 */
+      .color-palette {
+        background: var(--glass-bg);
+        backdrop-filter: blur(30px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 40px;
+        margin-bottom: 60px;
+        animation: fadeInUp 0.8s 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+      }
+
+      .color-palette h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 32px;
+        text-align: center;
+      }
+
+      .color-swatches {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+      }
+
+      .color-swatch {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .color-preview {
+        height: 80px;
+        border-radius: 16px;
+        border: 2px solid var(--glass-border);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s;
+      }
+
+      .color-preview::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
+      }
+
+      .color-swatch:hover .color-preview {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+      }
+
+      .color-info {
+        text-align: center;
+      }
+
+      .color-name {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 4px;
+        font-size: 0.95rem;
+      }
+
+      .color-code {
+        font-size: 0.85rem;
+        color: var(--muted);
+        font-family: monospace;
+      }
+
+      /* VRoid链接卡片 */
+      .vroid-link {
+        background: linear-gradient(135deg, rgba(224, 176, 255, 0.1), rgba(0, 255, 255, 0.05));
+        backdrop-filter: blur(30px);
+        border: 1px solid var(--accent-lavender);
+        border-radius: 24px;
+        padding: 40px;
+        text-align: center;
+        animation: fadeInUp 0.8s 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+      }
+
+      .vroid-link h3 {
+        font-family: "Syne", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--accent-lavender);
+      }
+
+      .vroid-link p {
+        color: var(--muted);
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      .vroid-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 40px;
+        background: linear-gradient(135deg, var(--accent-lavender), var(--accent));
+        color: var(--bg);
+        border: none;
+        border-radius: 16px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px rgba(224, 176, 255, 0.4);
+      }
+
+      .vroid-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s;
+      }
+
+      .vroid-btn::after {
+        content: '→';
+        font-size: 1.3em;
+        transition: transform 0.4s;
+      }
+
+      .vroid-btn:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 12px 48px rgba(224, 176, 255, 0.6);
+      }
+
+      .vroid-btn:hover::before {
+        transform: translateX(100%);
+      }
+
+      .vroid-btn:hover::after {
+        transform: translateX(6px);
+      }
+
+      /* 响应式 */
+      @media (max-width: 768px) {
+        main {
+          padding: 80px 16px 40px;
+        }
+
+        .home-link,
+        .lang-switch {
+          top: 16px;
+        }
+
+        .home-link {
+          left: 16px;
+        }
+
+        .lang-switch {
+          right: 16px;
+        }
+
+        .character-hero {
+          margin-bottom: 60px;
+        }
+
+        .info-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .color-swatches {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+</head>
+<body>
+    <!-- 背景图片 -->
+    <div class="background-image">
+      <img src="./background.jpeg" alt="Background">
+    </div>
+    <div class="grid-overlay"></div>
+
+    <!-- 返回主页 -->
+    <a href="index.html" class="home-link">
+      <span data-i18n="homeLink">ホームに戻る</span>
+    </a>
+
+    <!-- 语言切换 -->
+    <div class="lang-switch">
+      <button data-lang="ja" class="active"><span>日本語</span></button>
+      <button data-lang="zh"><span>中文</span></button>
+      <button data-lang="en"><span>EN</span></button>
+    </div>
+
+    <!-- 主内容 -->
+    <main>
+      <!-- 角色标题 -->
+      <section class="character-hero">
+        <h1 data-i18n="characterName">星音 ミル</h1>
+        <div class="subtitle">Hoshime Miru</div>
+        <div class="theme" data-i18n="theme">電脳サイバー猫 × 清楚系アイドル</div>
+      </section>
+
+      <!-- 信息卡片网格 -->
+      <div class="info-grid">
+        <!-- 基本情报 -->
+        <div class="info-card">
+          <h2 data-i18n="basicInfoTitle">基本情報</h2>
+          <div class="info-item">
+            <span class="info-label" data-i18n="labelAge">年齢</span>
+            <span class="info-value">16歳 <span data-i18n="appearanceAge">(外見年齢)</span></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label" data-i18n="labelHeight">身長</span>
+            <span class="info-value">165cm</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label" data-i18n="labelBody">体型</span>
+            <span class="info-value" data-i18n="bodyType">小柄、華奢、少し猫背気味</span>
+          </div>
+        </div>
+
+        <!-- 眼睛特征 -->
+        <div class="info-card">
+          <h2 data-i18n="eyesTitle">瞳の特徴</h2>
+          <div class="info-item">
+            <span class="info-label" data-i18n="labelLeftEye">左目</span>
+            <span class="info-value" style="color: #00FFFF;">
+              <span data-i18n="leftEyeColor">シアン</span> (#00FFFF)
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label" data-i18n="labelRightEye">右目</span>
+            <span class="info-value" style="color: #FFD700;">
+              <span data-i18n="rightEyeColor">アンバー</span> (#FFD700)
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label" data-i18n="labelEyeType">タイプ</span>
+            <span class="info-value" data-i18n="eyeType">オッドアイ（異色瞳）</span>
+          </div>
+        </div>
+
+        <!-- 肤色 -->
+        <div class="info-card">
+          <h2 data-i18n="skinTitle">肌の色</h2>
+          <div class="info-item">
+            <span class="info-label" data-i18n="labelSkinTone">基調</span>
+            <span class="info-value" data-i18n="skinTone">色白（Pale）</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label" data-i18n="labelBlush">血色</span>
+            <span class="info-value" data-i18n="blush">ほんのりピンク</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 颜色方案 -->
+      <section class="color-palette">
+        <h2 data-i18n="colorPaletteTitle">カラーパレット</h2>
+        <div class="color-swatches">
+          <div class="color-swatch">
+            <div class="color-preview" style="background: #FFFFFF;"></div>
+            <div class="color-info">
+              <div class="color-name" data-i18n="colorWhite">ピュアホワイト</div>
+              <div class="color-code">#FFFFFF</div>
+              <div class="color-code" data-i18n="colorWhiteUse">パーカー、髪のベース</div>
+            </div>
+          </div>
+
+          <div class="color-swatch">
+            <div class="color-preview" style="background: #E0B0FF;"></div>
+            <div class="color-info">
+              <div class="color-name" data-i18n="colorLavender">ラベンダー</div>
+              <div class="color-code">#E0B0FF</div>
+              <div class="color-code" data-i18n="colorLavenderUse">髪のグラデーション、スカート</div>
+            </div>
+          </div>
+
+          <div class="color-swatch">
+            <div class="color-preview" style="background: #00FFFF;"></div>
+            <div class="color-info">
+              <div class="color-name" data-i18n="colorCyan">シアン</div>
+              <div class="color-code">#00FFFF</div>
+              <div class="color-code" data-i18n="colorCyanUse">発光部分、左目</div>
+            </div>
+          </div>
+
+          <div class="color-swatch">
+            <div class="color-preview" style="background: #FFD700;"></div>
+            <div class="color-info">
+              <div class="color-name" data-i18n="colorAmber">アンバー</div>
+              <div class="color-code">#FFD700</div>
+              <div class="color-code" data-i18n="colorAmberUse">金具、右目</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VRoid链接 -->
+      <section class="vroid-link">
+        <h3 data-i18n="vroidTitle">VRoid Hub でモデルを見る</h3>
+        <p data-i18n="vroidDesc">完全な3Dモデルと詳細設定はVRoid Hubでご覧いただけます。</p>
+        <a href="https://hub.vroid.com/characters/6778642283515236019/models/63537359235761511"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="vroid-btn">
+          <span data-i18n="vroidButton">VRoid Hub で開く</span>
+        </a>
+      </section>
+    </main>
+
+    <script>
+      // 翻译
+      const translations = {
+        ja: {
+          homeLink: "ホームに戻る",
+          characterName: "星音 ミル",
+          theme: "電脳サイバー猫 × 清楚系アイドル",
+          basicInfoTitle: "基本情報",
+          labelAge: "年齢",
+          appearanceAge: "(外見年齢)",
+          labelHeight: "身長",
+          labelBody: "体型",
+          bodyType: "小柄、華奢、少し猫背気味",
+          eyesTitle: "瞳の特徴",
+          labelLeftEye: "左目",
+          leftEyeColor: "シアン",
+          labelRightEye: "右目",
+          rightEyeColor: "アンバー",
+          labelEyeType: "タイプ",
+          eyeType: "オッドアイ（異色瞳）",
+          skinTitle: "肌の色",
+          labelSkinTone: "基調",
+          skinTone: "色白（Pale）",
+          labelBlush: "血色",
+          blush: "ほんのりピンク",
+          colorPaletteTitle: "カラーパレット",
+          colorWhite: "ピュアホワイト",
+          colorWhiteUse: "パーカー、髪のベース",
+          colorLavender: "ラベンダー",
+          colorLavenderUse: "髪のグラデーション、スカート",
+          colorCyan: "シアン",
+          colorCyanUse: "発光部分、左目",
+          colorAmber: "アンバー",
+          colorAmberUse: "金具、右目",
+          vroidTitle: "VRoid Hub でモデルを見る",
+          vroidDesc: "完全な3Dモデルと詳細設定はVRoid Hubでご覧いただけます。",
+          vroidButton: "VRoid Hub で開く"
+        },
+        zh: {
+          homeLink: "返回主页",
+          characterName: "星音 米露",
+          theme: "电脑赛博猫 × 清纯系偶像",
+          basicInfoTitle: "基本信息",
+          labelAge: "年龄",
+          appearanceAge: "(外表年龄)",
+          labelHeight: "身高",
+          labelBody: "体型",
+          bodyType: "娇小、纤细、略微猫背",
+          eyesTitle: "眼睛特征",
+          labelLeftEye: "左眼",
+          leftEyeColor: "青色",
+          labelRightEye: "右眼",
+          rightEyeColor: "琥珀色",
+          labelEyeType: "类型",
+          eyeType: "异色瞳",
+          skinTitle: "肤色",
+          labelSkinTone: "基调",
+          skinTone: "白皙",
+          labelBlush: "血色",
+          blush: "略带粉红",
+          colorPaletteTitle: "配色方案",
+          colorWhite: "纯白",
+          colorWhiteUse: "帽衫、头发底色",
+          colorLavender: "薰衣草紫",
+          colorLavenderUse: "头发渐变、裙子",
+          colorCyan: "青色",
+          colorCyanUse: "发光部分、左眼",
+          colorAmber: "琥珀色",
+          colorAmberUse: "金属件、右眼",
+          vroidTitle: "在 VRoid Hub 查看模型",
+          vroidDesc: "完整的3D模型和详细设定可在VRoid Hub查看。",
+          vroidButton: "打开 VRoid Hub"
+        },
+        en: {
+          homeLink: "Back to Home",
+          characterName: "Hoshime Miru",
+          theme: "Cyber Cat × Pure Idol",
+          basicInfoTitle: "Basic Info",
+          labelAge: "Age",
+          appearanceAge: "(Appearance)",
+          labelHeight: "Height",
+          labelBody: "Body Type",
+          bodyType: "Petite, slender, slightly hunched",
+          eyesTitle: "Eye Features",
+          labelLeftEye: "Left Eye",
+          leftEyeColor: "Cyan",
+          labelRightEye: "Right Eye",
+          rightEyeColor: "Amber",
+          labelEyeType: "Type",
+          eyeType: "Heterochromia",
+          skinTitle: "Skin Tone",
+          labelSkinTone: "Base",
+          skinTone: "Pale",
+          labelBlush: "Blush",
+          blush: "Slightly pink",
+          colorPaletteTitle: "Color Palette",
+          colorWhite: "Pure White",
+          colorWhiteUse: "Hoodie, hair base",
+          colorLavender: "Lavender",
+          colorLavenderUse: "Hair gradient, skirt",
+          colorCyan: "Cyan",
+          colorCyanUse: "Glowing parts, left eye",
+          colorAmber: "Amber",
+          colorAmberUse: "Metal parts, right eye",
+          vroidTitle: "View Model on VRoid Hub",
+          vroidDesc: "The complete 3D model and detailed settings are available on VRoid Hub.",
+          vroidButton: "Open VRoid Hub"
+        }
+      };
+
+      // 语言切换功能
+      const langButtons = document.querySelectorAll("[data-lang]");
+      const translatableElements = document.querySelectorAll("[data-i18n]");
+      let currentLang = localStorage.getItem("characterLang") || "ja";
+
+      function setLanguage(lang) {
+        const pack = translations[lang];
+        if (!pack) return;
+
+        document.documentElement.lang = lang;
+        translatableElements.forEach((node) => {
+          const key = node.dataset.i18n;
+          if (pack[key]) node.textContent = pack[key];
+        });
+
+        langButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.lang === lang));
+        localStorage.setItem("characterLang", lang);
+        currentLang = lang;
+      }
+
+      langButtons.forEach((btn) => {
+        btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+      });
+
+      // 初始化语言
+      setLanguage(currentLang);
+    </script>
+</body>
+</html>
