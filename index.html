@@ -187,6 +187,46 @@
         color: var(--muted);
       }
 
+      .lyrics {
+        margin-top: 12px;
+        max-width: 720px;
+        opacity: 0;
+        transform: translateY(16px);
+        transition: opacity 1.6s ease, transform 1.6s ease;
+      }
+
+      .lyrics h3 {
+        margin: 0 0 12px;
+        font-family: "Syne", sans-serif;
+        font-size: 1.1rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .lyrics-lines p {
+        margin: 0 0 8px;
+        color: var(--muted);
+        line-height: 1.8;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 1.4s ease, transform 1.4s ease;
+      }
+
+      .lyrics-visible .lyrics {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .lyrics-visible .lyrics-lines p {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .lyrics-lines p.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
       @media (max-width: 700px) {
         body {
           overflow-y: auto;
@@ -232,6 +272,15 @@
         <div class="visualizer-wrap">
           <canvas id="visualizer"></canvas>
         </div>
+        <section class="lyrics" id="lyrics">
+          <h3 data-i18n="lyricsTitle">Lyrics / 光影</h3>
+          <div class="lyrics-lines">
+            <p data-i18n="lyric1" data-time="2">黑白之间，静态里藏着旋律。</p>
+            <p data-i18n="lyric2" data-time="6">滚轮轻转，画面逐格浮现。</p>
+            <p data-i18n="lyric3" data-time="11">每一拍都是入口的坐标。</p>
+            <p data-i18n="lyric4" data-time="16">让声音带你进入下一幕。</p>
+          </div>
+        </section>
       </main>
 
       <div class="progress">
@@ -262,7 +311,12 @@
           newyearTitle: "2026 新年祝贺",
           newyearBody: "一段带有光场与祝词的声音祝福，开启新年的频率。",
           newyearCTA: "开启祝贺",
-          scrollHint: "滚动"
+          scrollHint: "滚动",
+          lyricsTitle: "Lyrics / 光影",
+          lyric1: "黑白之间，静态里藏着旋律。",
+          lyric2: "滚轮轻转，画面逐格浮现。",
+          lyric3: "每一拍都是入口的坐标。",
+          lyric4: "让声音带你进入下一幕。"
         },
         ja: {
           pageTitle: "Kユニバース・ゲート",
@@ -279,7 +333,12 @@
           newyearTitle: "2026 新年のご挨拶",
           newyearBody: "光の祝福とメッセージで新年の周波数を開く。",
           newyearCTA: "メッセージを開く",
-          scrollHint: "スクロール"
+          scrollHint: "スクロール",
+          lyricsTitle: "Lyrics / 光と影",
+          lyric1: "モノクロの静寂に旋律が潜む。",
+          lyric2: "スクロールでフレームが浮かび上がる。",
+          lyric3: "一拍ごとに入口の座標が刻まれる。",
+          lyric4: "音が次の幕へ誘う。"
         },
         en: {
           pageTitle: "K Universe Gateway",
@@ -296,7 +355,12 @@
           newyearTitle: "2026 New Year Greeting",
           newyearBody: "A luminous sonic blessing to open the new-year frequency.",
           newyearCTA: "Open greeting",
-          scrollHint: "Scroll"
+          scrollHint: "Scroll",
+          lyricsTitle: "Lyrics / Monochrome",
+          lyric1: "Between black and white, a melody hides.",
+          lyric2: "A gentle scroll reveals each frame.",
+          lyric3: "Every beat marks a new doorway.",
+          lyric4: "Let the sound carry you to the next scene."
         }
       };
 
@@ -437,6 +501,25 @@
         setStage(progress);
         requestAnimationFrame(animateProgress);
       }
+
+      const lyricLines = Array.from(document.querySelectorAll(".lyrics-lines p"));
+
+      function updateLyrics() {
+        if (!audio.duration) return;
+        const current = audio.currentTime;
+        lyricLines.forEach((line) => {
+          const start = Number(line.dataset.time || 0);
+          line.classList.toggle("active", current >= start);
+        });
+      }
+
+      audio.addEventListener("play", () => {
+        document.body.classList.add("lyrics-visible");
+        updateLyrics();
+      });
+
+      audio.addEventListener("timeupdate", updateLyrics);
+      audio.addEventListener("seeked", updateLyrics);
 
       window.addEventListener("wheel", onWheel, { passive: false });
       window.addEventListener("resize", resizeCanvas);
