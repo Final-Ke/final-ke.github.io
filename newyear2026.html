@@ -6,26 +6,31 @@
     <title>K的2026声波祝福</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-      href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@300;400&display=swap"
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
         color-scheme: dark;
-        --bg: #050505;
+        --bg: #0a0508;
         --text: #f8f8f8;
-        --muted: rgba(248, 248, 248, 0.6);
-        --line: rgba(248, 248, 248, 0.2);
-        --card: rgba(255, 255, 255, 0.04);
+        --muted: rgba(248, 248, 248, 0.7);
+        --line: rgba(248, 248, 248, 0.15);
+        --accent: #f6d365;
+        --accent-secondary: #fda085;
+        --accent-glow: rgba(246, 211, 101, 0.4);
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
       }
 
       * {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
 
       body {
-        margin: 0;
         min-height: 100vh;
         font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
         color: var(--text);
@@ -34,212 +39,120 @@
         overflow-x: hidden;
       }
 
-      .soft-glow {
+      /* 动态背景光效 */
+      .glow-container {
         position: fixed;
-        inset: -15%;
-        background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.15), rgba(5, 5, 5, 0) 60%);
-        opacity: 0.4;
-        filter: blur(18px);
-        z-index: 1;
-        pointer-events: none;
-        animation: glowPulse 18s ease-in-out infinite;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        background: radial-gradient(ellipse at 50% 30%, rgba(246, 211, 101, 0.1), transparent 60%),
+                    radial-gradient(ellipse at 80% 70%, rgba(253, 160, 133, 0.08), transparent 50%),
+                    var(--bg);
       }
 
       .orb {
         position: absolute;
-        width: 320px;
-        height: 320px;
         border-radius: 50%;
-        filter: blur(40px);
-        opacity: 0.25;
-        z-index: 0;
-        animation: float 10s ease-in-out infinite;
+        filter: blur(60px);
+        opacity: 0;
+        animation: orbFloat 8s ease-in-out infinite, orbFade 4s ease-in-out infinite;
+      }
+
+      .orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(246, 211, 101, 0.4), transparent);
+        top: -100px;
+        right: -100px;
+        animation-delay: 0s;
+      }
+
+      .orb-2 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(253, 160, 133, 0.3), transparent);
+        bottom: -80px;
+        left: -80px;
+        animation-delay: -2s;
+      }
+
+      .orb-3 {
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(246, 211, 101, 0.25), transparent);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation-delay: -4s;
+      }
+
+      @keyframes orbFloat {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(30px) scale(1.05); }
+      }
+
+      @keyframes orbFade {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 0.9; }
+      }
+
+      /* 粒子效果 */
+      .particle {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: var(--accent);
+        border-radius: 50%;
+        opacity: 0;
+        animation: particleRise linear infinite;
+        box-shadow: 0 0 10px var(--accent-glow);
+      }
+
+      @keyframes particleRise {
+        0% {
+          transform: translateY(100vh) translateX(0) scale(0);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100px) translateX(var(--drift, 50px)) scale(1);
+          opacity: 0;
+        }
+      }
+
+      .grid-overlay {
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(246, 211, 101, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(246, 211, 101, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        opacity: 0.4;
         pointer-events: none;
-        background: rgba(255, 255, 255, 0.1);
+        z-index: 0;
       }
 
-      .orb-one {
-        top: -80px;
-        right: -80px;
-      }
-
-      .orb-two {
-        bottom: -120px;
-        left: -60px;
-        animation-delay: -3s;
-      }
-
-      .orb-three {
-        top: 45%;
-        left: 60%;
-        width: 220px;
-        height: 220px;
-        animation-delay: -6s;
-      }
-
-      @keyframes float {
-        0%,
-        100% {
-          transform: translateY(0px);
-        }
-        50% {
-          transform: translateY(18px);
-        }
-      }
-
-      @keyframes glowPulse {
-        0%,
-        100% {
-          opacity: 0.35;
-        }
-        50% {
-          opacity: 0.55;
-        }
-      }
-
+      /* Header */
       header {
-        padding: 24px clamp(20px, 5vw, 90px);
+        position: relative;
+        z-index: 10;
+        padding: 24px clamp(20px, 5vw, 100px);
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
-        gap: 16px;
-        position: relative;
-        z-index: 2;
+        gap: 20px;
+        animation: slideDown 0.8s ease-out;
       }
 
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-
-      .lang-switch {
-        display: flex;
-        gap: 10px;
-      }
-
-      .lang-switch button {
-        border-radius: 999px;
-        border: 1px solid var(--line);
-        background: transparent;
-        color: var(--text);
-        padding: 6px 18px;
-        font-size: 0.85rem;
-        cursor: pointer;
-      }
-
-      .lang-switch button.active {
-        background: var(--text);
-        color: var(--bg);
-      }
-
-      main {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 0 clamp(20px, 5vw, 90px) 80px;
-        display: flex;
-        flex-direction: column;
-        gap: 32px;
-        position: relative;
-        z-index: 2;
-      }
-
-      .hero {
-        border: 1px solid var(--line);
-        border-radius: 28px;
-        padding: clamp(24px, 5vw, 60px);
-        background: var(--card);
-        display: grid;
-        gap: 16px;
-        animation: fadeUp 0.8s ease forwards;
-      }
-
-      .hero p:first-child {
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        font-size: 0.85rem;
-        color: var(--muted);
-      }
-
-      .hero h1 {
-        margin: 0;
-        font-family: "Syne", sans-serif;
-        font-size: clamp(2.2rem, 5vw, 3.5rem);
-      }
-
-      .hero p {
-        margin: 0;
-        line-height: 1.7;
-        color: var(--muted);
-      }
-
-      .blessing {
-        border: 1px solid var(--line);
-        border-radius: 22px;
-        padding: 24px;
-        background: rgba(255, 255, 255, 0.02);
-        line-height: 1.8;
-        font-size: 1.05rem;
-        animation: fadeUp 0.8s ease forwards;
-        animation-delay: 0.1s;
-      }
-
-      audio {
-        width: 100%;
-      }
-
-      .audio-card {
-        border: 1px solid var(--line);
-        border-radius: 22px;
-        padding: 24px;
-        background: rgba(255, 255, 255, 0.02);
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        animation: fadeUp 0.8s ease forwards;
-        animation-delay: 0.2s;
-      }
-
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 14px;
-      }
-
-      .button {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border-radius: 999px;
-        padding: 10px 20px;
-        border: 1px solid transparent;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-      }
-
-      .button.primary {
-        background: var(--text);
-        color: var(--bg);
-      }
-
-      .button.secondary {
-        border-color: var(--line);
-        color: var(--text);
-      }
-
-      footer {
-        text-align: center;
-        color: var(--muted);
-        font-size: 0.85rem;
-        position: relative;
-        z-index: 2;
-        padding-bottom: 30px;
-      }
-
-      @keyframes fadeUp {
+      @keyframes slideDown {
         from {
           opacity: 0;
-          transform: translateY(16px);
+          transform: translateY(-30px);
         }
         to {
           opacity: 1;
@@ -247,27 +160,389 @@
         }
       }
 
-      @media (max-width: 640px) {
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--text);
+        text-decoration: none;
+        padding: 12px 24px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .back-link::before {
+        content: '←';
+        font-size: 1.2em;
+        transition: transform 0.3s;
+      }
+
+      .back-link:hover {
+        background: rgba(246, 211, 101, 0.1);
+        border-color: var(--accent);
+        transform: translateX(-4px);
+      }
+
+      .back-link:hover::before {
+        transform: translateX(-4px);
+      }
+
+      .lang-switch {
+        display: flex;
+        gap: 8px;
+        padding: 4px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+      }
+
+      .lang-switch button {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        padding: 8px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+
+      .lang-switch button::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        border-radius: 8px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .lang-switch button span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .lang-switch button.active {
+        color: var(--bg);
+      }
+
+      .lang-switch button.active::before {
+        opacity: 1;
+      }
+
+      .lang-switch button:hover:not(.active) {
+        color: var(--text);
+        background: rgba(246, 211, 101, 0.1);
+      }
+
+      /* Main Content */
+      main {
+        position: relative;
+        z-index: 2;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px clamp(20px, 5vw, 100px) 100px;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+      }
+
+      /* Hero Section */
+      .hero {
+        padding: 60px clamp(32px, 6vw, 80px);
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        animation: fadeUp 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 200%;
+        background: linear-gradient(180deg, rgba(246, 211, 101, 0.1), transparent);
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .hero > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hero p:first-child {
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 0.85rem;
+        color: var(--accent);
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+
+      .hero h1 {
+        margin: 0 0 24px;
+        font-family: "Syne", sans-serif;
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: 800;
+        line-height: 1.1;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .hero p:last-child {
+        line-height: 1.8;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+
+      /* Blessing Card */
+      .blessing {
+        padding: 48px;
+        background: linear-gradient(135deg, rgba(246, 211, 101, 0.05), rgba(253, 160, 133, 0.05));
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 28px;
+        border-left: 4px solid var(--accent);
+        line-height: 1.9;
+        font-size: 1.1rem;
+        animation: fadeUp 0.8s ease-out 0.2s both;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .blessing:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 80px var(--accent-glow);
+      }
+
+      /* Audio Card */
+      .audio-card {
+        padding: 40px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        animation: fadeUp 0.8s ease-out 0.4s both;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .audio-head {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .audio-head strong {
+        font-family: "Syne", sans-serif;
+        font-size: 1.5rem;
+        color: var(--accent);
+      }
+
+      .audio-head p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .audio-controls {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        font-family: inherit;
+      }
+
+      .button.ghost {
+        background: rgba(246, 211, 101, 0.1);
+        border: 1px solid var(--accent);
+        color: var(--accent);
+      }
+
+      .button.ghost:hover {
+        background: rgba(246, 211, 101, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px var(--accent-glow);
+      }
+
+      .button.ghost.active {
+        background: var(--accent);
+        color: var(--bg);
+      }
+
+      .button.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        color: var(--bg);
+        box-shadow: 0 4px 20px var(--accent-glow);
+      }
+
+      .button.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px var(--accent-glow);
+      }
+
+      .button.secondary {
+        border: 1px solid var(--line);
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .button.secondary:hover {
+        border-color: var(--accent);
+        background: rgba(246, 211, 101, 0.1);
+        transform: translateY(-2px);
+      }
+
+      /* Visualizer */
+      .visualizer {
+        position: relative;
+        width: 100%;
+        height: 300px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      #vizCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .viz-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      .viz-overlay span {
+        padding: 12px 24px;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      /* Audio Element */
+      audio {
+        width: 100%;
+        height: 52px;
+        border-radius: 12px;
+        outline: none;
+      }
+
+      audio::-webkit-media-controls-panel {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 12px;
+      }
+
+      /* Actions */
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+        position: relative;
+        z-index: 2;
+        padding-bottom: 40px;
+        animation: fadeUp 0.8s ease-out 0.6s both;
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
+        header {
+          flex-direction: column;
+          gap: 16px;
+        }
+
         .lang-switch {
           width: 100%;
           justify-content: center;
         }
-      }
 
+        main {
+          padding: 20px 20px 60px;
+        }
+
+        .hero,
+        .blessing,
+        .audio-card {
+          padding: 32px 24px;
+        }
+
+        .visualizer {
+          height: 200px;
+        }
+      }
     </style>
   </head>
   <body>
-    <div class="soft-glow" id="softGlow"></div>
-    <div class="orb orb-one"></div>
-    <div class="orb orb-two"></div>
-    <div class="orb orb-three"></div>
+    <div class="glow-container" id="glowContainer">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="grid-overlay"></div>
 
     <header>
-      <a href="index.html" data-i18n="backHome">← 返回入口</a>
+      <a href="index.html" class="back-link">
+        <span data-i18n="backHome">返回入口</span>
+      </a>
       <div class="lang-switch">
-        <button data-lang="zh" class="active">中文</button>
-        <button data-lang="ja">日本語</button>
-        <button data-lang="en">EN</button>
+        <button data-lang="zh" class="active"><span>中文</span></button>
+        <button data-lang="ja"><span>日本語</span></button>
+        <button data-lang="en"><span>EN</span></button>
       </div>
     </header>
 
@@ -281,114 +556,114 @@
       </section>
 
       <section class="blessing" data-i18n="blessingText">
-        愿2026年的每一次启动都像温暖的渐强：音量缓慢推开，旋钮稳重而果敢。愿你在忙碌里保持一段静默，让灵感像低频一样渗透；愿你最终的母带足够响亮，却依旧保留柔软的动态。
+        愿2026年的每一次启动都像温暖的渐强:音量缓慢推开,旋钮稳重而果敢。愿你在忙碌里保持一段静默,让灵感像低频一样渗透;愿你最终的母带足够响亮,却依旧保留柔软的动态。
       </section>
 
       <section class="audio-card">
         <div class="audio-head">
           <div>
             <strong data-i18n="audioTitle">声波祝福片段</strong>
-            <p data-i18n="audioDesc">建议佩戴耳机聆听，感受低频与钟鸣的交织。</p>
+            <p data-i18n="audioDesc">建议佩戴耳机聆听,感受低频与钟鸣的交织。</p>
           </div>
           <div class="audio-controls">
             <button class="button ghost" id="vizToggle" data-i18n="vizStart">启动可视化</button>
-            <button class="button ghost active" id="pulseToggle" data-i18n="pulseOn">互动光场：开</button>
+            <button class="button ghost active" id="pulseToggle" data-i18n="pulseOn">互动光场:开</button>
           </div>
         </div>
 
         <div class="visualizer" id="visualizer">
           <canvas id="vizCanvas"></canvas>
           <div class="viz-overlay">
-            <span data-i18n="vizHint">点击播放并移动鼠标，让声波追随。</span>
+            <span data-i18n="vizHint">点击播放并移动鼠标,让声波追随。</span>
           </div>
         </div>
 
-        <audio id="greetingAudio" controls preload="none" >
-          <source
-            src="Newyear2026.mp3"
-            type="audio/mpeg"
-          />
+        <audio id="greetingAudio" controls preload="none">
+          <source src="Newyear2026.mp3" type="audio/mpeg" />
           Your browser does not support the audio element.
         </audio>
 
         <div class="actions">
-          <a
-            class="button primary"
-            href="Newyear2026.mp3"
-            download
-            data-i18n="downloadBtn"
-            >下载音频</a
-          >
-          <a
-            class="button secondary"
-            href="mailto:xskk1998@gmail.com?subject=2026%20New%20Year"
-            data-i18n="replyBtn"
-            >回传你的频率</a
-          >
+          <a class="button primary" href="Newyear2026.mp3" download data-i18n="downloadBtn">下载音频</a>
+          <a class="button secondary" href="mailto:xskk1998@gmail.com?subject=2026%20New%20Year" data-i18n="replyBtn">回传你的频率</a>
         </div>
       </section>
     </main>
 
-    <footer data-i18n="footer">K Audio Lab · 向2026举杯，愿每个频段都有祝福</footer>
+    <footer data-i18n="footer">K Audio Lab · 向2026举杯,愿每个频段都有祝福</footer>
 
     <script>
+      // 创建粒子
+      function createParticles() {
+        const container = document.getElementById('glowContainer');
+        const particleCount = 40;
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = Math.random() * 100 + '%';
+          particle.style.setProperty('--drift', (Math.random() * 100 - 50) + 'px');
+          particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+          particle.style.animationDelay = Math.random() * 5 + 's';
+          container.appendChild(particle);
+        }
+      }
+
+      createParticles();
+
       const translations = {
         zh: {
           pageTitle: "K的2026声波祝福",
-          backHome: "← 返回入口",
+          backHome: "返回入口",
           heroEyebrow: "2026 · GOLDEN RESONANCE",
           heroTitle: "愿所有声音在新年结成光的余韵",
           heroSubtitle: "这份祝福由胶带回声、模拟振幅与城市的呼吸录制。送给所有同行、朋友与远方的你。",
-          blessingText:
-            "愿2026年的每一次启动都像温暖的渐强：音量缓慢推开，旋钮稳重而果敢。愿你在忙碌里保持一段静默，让灵感像低频一样渗透；愿你最终的母带足够响亮，却依旧保留柔软的动态。",
+          blessingText: "愿2026年的每一次启动都像温暖的渐强:音量缓慢推开,旋钮稳重而果敢。愿你在忙碌里保持一段静默,让灵感像低频一样渗透;愿你最终的母带足够响亮,却依旧保留柔软的动态。",
           audioTitle: "声波祝福片段",
-          audioDesc: "建议佩戴耳机聆听，感受低频与钟鸣的交织。",
+          audioDesc: "建议佩戴耳机聆听,感受低频与钟鸣的交织。",
           vizStart: "启动可视化",
           vizReady: "可视化已启动",
           vizFail: "可视化不可用",
-          pulseOn: "互动光场：开",
-          pulseOff: "互动光场：关",
-          vizHint: "点击播放并移动鼠标，让声波追随。",
+          pulseOn: "互动光场:开",
+          pulseOff: "互动光场:关",
+          vizHint: "点击播放并移动鼠标,让声波追随。",
           downloadBtn: "下载音频",
           replyBtn: "回传你的频率",
-          footer: "K Audio Lab · 向2026举杯，愿每个频段都有祝福"
+          footer: "K Audio Lab · 向2026举杯,愿每个频段都有祝福"
         },
         ja: {
           pageTitle: "Kの2026サウンドメッセージ",
-          backHome: "← 入口へ戻る",
+          backHome: "入口へ戻る",
           heroEyebrow: "2026 · GOLDEN RESONANCE",
           heroTitle: "すべての音が光の余韻になりますように",
           heroSubtitle: "テープエコーとアナログの揺らぎ、都市の息遣いを束ねた祝福。仲間と友人、そして遠くのあなたへ。",
-          blessingText:
-            "2026年のスタートが穏やかなクレッシェンドのようでありますように。忙しさの中にも静寂を持ち、低域のようにアイデアが染み込む時間を。最終マスターは力強く、それでいて柔らかなダイナミクスを保っていますように。",
+          blessingText: "2026年のスタートが穏やかなクレッシェンドのようでありますように。忙しさの中にも静寂を持ち,低域のようにアイデアが染み込む時間を。最終マスターは力強く,それでいて柔らかなダイナミクスを保っていますように。",
           audioTitle: "サウンドブレッシング",
           audioDesc: "ヘッドフォンでの試聴がおすすめ。低域と鐘の響きをお楽しみください。",
           vizStart: "可視化を起動",
           vizReady: "可視化が有効",
           vizFail: "可視化を利用できません",
-          pulseOn: "インタラクティブ: オン",
-          pulseOff: "インタラクティブ: オフ",
+          pulseOn: "インタラクティブ:オン",
+          pulseOff: "インタラクティブ:オフ",
           vizHint: "再生しながらカーソルを動かすと光が追いかけます。",
           downloadBtn: "音源をダウンロード",
           replyBtn: "あなたの周波数を返す",
-          footer: "K Audio Lab · 2026年へ、すべての帯域に祝福を"
+          footer: "K Audio Lab · 2026年へ,すべての帯域に祝福を"
         },
         en: {
           pageTitle: "K's 2026 Sonic Greeting",
-          backHome: "← Back to gateway",
+          backHome: "Back to gateway",
           heroEyebrow: "2026 · GOLDEN RESONANCE",
           heroTitle: "May every sound bloom into light this year",
-          heroSubtitle:
-            "Recorded with tape echo, analog bloom, and the breath of the city—a blessing for collaborators, friends, and you.",
-          blessingText:
-            "May every 2026 launch feel like a gentle crescendo: faders rising with calm, knobs moving with intent. May you carve out silence inside the rush so inspiration seeps in like low end; may your final masters stay bold yet tender in dynamics.",
+          heroSubtitle: "Recorded with tape echo, analog bloom, and the breath of the city—a blessing for collaborators, friends, and you.",
+          blessingText: "May every 2026 launch feel like a gentle crescendo: faders rising with calm, knobs moving with intent. May you carve out silence inside the rush so inspiration seeps in like low end; may your final masters stay bold yet tender in dynamics.",
           audioTitle: "Sonic blessing excerpt",
           audioDesc: "Headphones recommended to feel the low end braided with chimes.",
           vizStart: "Enable visualizer",
           vizReady: "Visualizer enabled",
           vizFail: "Visualizer unavailable",
-          pulseOn: "Interactive glow: On",
-          pulseOff: "Interactive glow: Off",
+          pulseOn: "Interactive glow:On",
+          pulseOff: "Interactive glow:Off",
           vizHint: "Play the track and move your cursor to steer the light.",
           downloadBtn: "Download audio",
           replyBtn: "Send your own frequency",
@@ -415,8 +690,6 @@
       let rafId;
       let canvasSize = { width: 0, height: 0 };
       let pointer = { x: 0.5, y: 0.5 };
-      let glowTarget = { x: 0.5, y: 0.5 };
-      let glowCurrent = { x: 0.5, y: 0.5 };
 
       function setLanguage(lang) {
         const pack = translations[lang];
@@ -460,7 +733,7 @@
         try {
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 256;
+          analyser.fftSize = 512;
           dataArray = new Uint8Array(analyser.frequencyBinCount);
           source = audioCtx.createMediaElementSource(audio);
           source.connect(analyser);
@@ -480,9 +753,12 @@
         const { width, height } = canvasSize;
         ctx.clearRect(0, 0, width, height);
 
-        const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, "rgba(246, 211, 101, 0.9)");
-        gradient.addColorStop(1, "rgba(253, 160, 133, 0.9)");
+        // 背景渐变
+        const bgGradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 2);
+        bgGradient.addColorStop(0, 'rgba(20, 10, 5, 0.9)');
+        bgGradient.addColorStop(1, 'rgba(10, 5, 8, 0.95)');
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, width, height);
 
         let energy = 0.2;
         if (analyser && dataArray) {
@@ -493,52 +769,59 @@
           energy = 0.25 + 0.1 * Math.sin(timestamp / 700);
         }
 
+        // 互动光场
         if (pulseEnabled) {
-          const glowRadius = Math.min(width, height) * (0.25 + energy * 0.35);
+          const glowRadius = Math.min(width, height) * (0.3 + energy * 0.4);
           const glowX = width * pointer.x;
           const glowY = height * pointer.y;
           const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, glowRadius);
-          glow.addColorStop(0, `rgba(246, 211, 101, ${0.35 + energy * 0.4})`);
-          glow.addColorStop(1, "rgba(6, 7, 14, 0)");
+          glow.addColorStop(0, `rgba(246, 211, 101, ${0.4 + energy * 0.5})`);
+          glow.addColorStop(0.5, `rgba(253, 160, 133, ${0.2 + energy * 0.3})`);
+          glow.addColorStop(1, "rgba(10, 5, 8, 0)");
           ctx.fillStyle = glow;
           ctx.fillRect(0, 0, width, height);
         }
 
-        const bars = 46;
+        // 绘制音频条
+        const bars = 48;
         const barWidth = width / bars;
-        const scale = 0.8 + pointer.y * 0.5;
+        const gradient = ctx.createLinearGradient(0, height, 0, 0);
+        gradient.addColorStop(0, '#f6d365');
+        gradient.addColorStop(0.5, '#fda085');
+        gradient.addColorStop(1, '#ffb6a3');
+
         for (let i = 0; i < bars; i += 1) {
           let value = energy * 0.6;
           if (dataArray) {
             value = dataArray[i] / 255;
           } else {
-            value = 0.2 + 0.1 * Math.sin(timestamp / 400 + i * 0.5);
+            value = 0.25 + 0.12 * Math.sin(timestamp / 400 + i * 0.5);
           }
-          const barHeight = Math.max(6, value * height * 0.65 * scale);
+          const barHeight = Math.max(8, value * height * 0.7);
           const x = i * barWidth + barWidth * 0.15;
-          const y = height - barHeight - 12;
+          const y = height - barHeight - 20;
+
           ctx.fillStyle = gradient;
           ctx.fillRect(x, y, barWidth * 0.7, barHeight);
+
+          // 发光效果
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = '#f6d365';
+          ctx.fillRect(x, y, barWidth * 0.7, barHeight);
+          ctx.shadowBlur = 0;
         }
 
-        ctx.strokeStyle = `rgba(255, 245, 230, ${0.25 + energy * 0.35})`;
-        ctx.lineWidth = 2;
+        // 波浪线
+        ctx.strokeStyle = `rgba(246, 211, 101, ${0.4 + energy * 0.4})`;
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        const waveAmplitude = 8 + energy * 30;
-        for (let x = 0; x <= width; x += 12) {
-          const y = height * 0.72 + Math.sin(timestamp / 500 + x / 50) * waveAmplitude;
-          if (x === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
+        const waveAmplitude = 12 + energy * 35;
+        for (let x = 0; x <= width; x += 8) {
+          const y = height * 0.65 + Math.sin(timestamp / 500 + x / 40) * waveAmplitude;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
         }
         ctx.stroke();
-
-        glowCurrent.x += (glowTarget.x - glowCurrent.x) * 0.03;
-        glowCurrent.y += (glowTarget.y - glowCurrent.y) * 0.03;
-        document.documentElement.style.setProperty("--glow-x", `${(glowCurrent.x * 100).toFixed(2)}%`);
-        document.documentElement.style.setProperty("--glow-y", `${(glowCurrent.y * 100).toFixed(2)}%`);
 
         rafId = requestAnimationFrame(drawVisualizer);
       }
@@ -549,16 +832,6 @@
           x: Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1),
           y: Math.min(Math.max((event.clientY - rect.top) / rect.height, 0), 1)
         };
-      });
-
-      window.addEventListener("pointermove", (event) => {
-        const x = Math.min(Math.max(event.clientX / window.innerWidth, 0), 1);
-        const y = Math.min(Math.max(event.clientY / window.innerHeight, 0), 1);
-        glowTarget = { x, y };
-      });
-
-      window.addEventListener("pointerleave", () => {
-        glowTarget = { x: 0.5, y: 0.5 };
       });
 
       vizToggle.addEventListener("click", () => {
@@ -584,9 +857,7 @@
         }
       });
 
-      window.addEventListener("resize", () => {
-        resizeCanvas();
-      });
+      window.addEventListener("resize", resizeCanvas);
 
       resizeCanvas();
       drawVisualizer(0);

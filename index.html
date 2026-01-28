@@ -7,43 +7,85 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=IBM+Plex+Mono:wght@300;400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
         color-scheme: dark;
-        --bg: #050505;
+        --bg: #0a0a0f;
+        --bg-secondary: #13131a;
         --text: #f8f8f8;
-        --muted: rgba(248, 248, 248, 0.6);
-        --line: rgba(248, 248, 248, 0.2);
-        --accent: #ffffff;
+        --muted: rgba(248, 248, 248, 0.65);
+        --line: rgba(248, 248, 248, 0.15);
+        --accent: #00ffff;
+        --accent-glow: rgba(0, 255, 255, 0.3);
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
       }
 
       * {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
 
       body {
-        margin: 0;
         min-height: 100vh;
         font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
         background: var(--bg);
         color: var(--text);
         overflow: hidden;
+        position: relative;
       }
 
-      .visualizer-wrap {
-        margin-top: 24px;
-        border: 1px solid var(--line);
-        padding: 12px;
+      /* 动态背景粒子 */
+      .background {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        background: radial-gradient(ellipse at 50% 0%, rgba(0, 255, 255, 0.08), transparent 60%),
+                    radial-gradient(ellipse at 80% 50%, rgba(255, 0, 255, 0.05), transparent 50%),
+                    var(--bg);
       }
 
-      canvas {
-        width: 100%;
-        height: 260px;
-        display: block;
-        background: #050505;
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        animation: float-particle linear infinite;
+      }
+
+      @keyframes float-particle {
+        0% {
+          transform: translateY(100vh) translateX(0);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100px) translateX(100px);
+          opacity: 0;
+        }
+      }
+
+      .grid-overlay {
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        opacity: 0.5;
+        pointer-events: none;
       }
 
       .ui {
@@ -52,172 +94,373 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
-        padding: 24px clamp(20px, 4vw, 80px);
+        padding: 32px clamp(24px, 5vw, 100px);
       }
 
+      /* Header 设计 */
       header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 16px;
-        font-size: 0.9rem;
+        gap: 20px;
+        padding: 20px 32px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.6s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .brand {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 8px;
       }
 
       .brand span:first-child {
         font-family: "Syne", sans-serif;
+        font-size: 1.2rem;
+        font-weight: 800;
         letter-spacing: 0.2em;
         text-transform: uppercase;
+        background: linear-gradient(135deg, #fff, var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .brand span:last-child {
+        font-size: 0.85rem;
+        color: var(--muted);
       }
 
       .lang-switch {
         display: flex;
-        gap: 10px;
+        gap: 8px;
+        padding: 4px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
       }
 
       .lang-switch button {
         background: transparent;
-        border: 1px solid var(--line);
-        color: var(--text);
-        padding: 6px 16px;
-        border-radius: 999px;
+        border: none;
+        color: var(--muted);
+        padding: 8px 18px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+
+      .lang-switch button::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--accent), #00aaff);
+        border-radius: 8px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .lang-switch button span {
+        position: relative;
+        z-index: 1;
       }
 
       .lang-switch button.active {
-        background: var(--text);
-        color: var(--bg);
+        color: var(--text);
       }
 
+      .lang-switch button.active::before {
+        opacity: 1;
+      }
+
+      .lang-switch button:hover:not(.active) {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      /* Main Content */
       main {
         flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        gap: 28px;
+        gap: 40px;
+        padding: 60px 0;
       }
 
       .stage {
-        max-width: 680px;
+        max-width: 800px;
         display: flex;
         flex-direction: column;
-        gap: 18px;
+        gap: 24px;
+        padding: 48px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 28px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.5s ease, transform 0.5s ease;
+        transform: translateY(40px) scale(0.95);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stage::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.6s;
+      }
+
+      .stage:hover::before {
+        left: 100%;
       }
 
       .stage.active {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
       }
 
       .stage h1,
       .stage h2 {
-        margin: 0;
         font-family: "Syne", sans-serif;
         letter-spacing: 0.02em;
+        line-height: 1.2;
+        font-weight: 800;
+      }
+
+      .stage h1 {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .stage h2 {
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
       }
 
       .stage p {
-        margin: 0;
         color: var(--muted);
-        line-height: 1.7;
-        font-size: 0.95rem;
+        line-height: 1.8;
+        font-size: 1.05rem;
       }
 
       .stage a {
-        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--bg);
+        background: linear-gradient(135deg, var(--accent), #00aaff);
         text-decoration: none;
-        border-bottom: 1px solid var(--accent);
-        padding-bottom: 2px;
-        align-self: flex-start;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px var(--accent-glow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stage a::after {
+        content: '→';
+        transition: transform 0.3s;
+      }
+
+      .stage a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px var(--accent-glow);
+      }
+
+      .stage a:hover::after {
+        transform: translateX(4px);
       }
 
       .controls {
         display: flex;
-        gap: 12px;
+        gap: 16px;
         align-items: center;
-        margin-top: 12px;
+        margin-top: 16px;
+        flex-wrap: wrap;
       }
 
       .audio-button {
-        border: 1px solid var(--line);
-        background: transparent;
-        color: var(--text);
-        padding: 6px 14px;
-        border-radius: 6px;
+        border: 2px solid var(--accent);
+        background: rgba(0, 255, 255, 0.1);
+        color: var(--accent);
+        padding: 12px 24px;
+        border-radius: 12px;
         cursor: pointer;
-        font-size: 0.85rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
       }
 
+      .audio-button::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--accent);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .audio-button span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .audio-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 20px var(--accent-glow);
+      }
+
+      .audio-button:hover::before {
+        opacity: 0.2;
+      }
+
+      .hint {
+        font-size: 0.85rem;
+        color: var(--muted);
+        opacity: 0.8;
+      }
+
+      /* 可视化器设计 */
+      .visualizer-wrap {
+        margin-top: 32px;
+        padding: 24px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: all 0.4s;
+      }
+
+      .visualizer-wrap:hover {
+        border-color: var(--accent);
+        box-shadow: 0 8px 40px var(--accent-glow);
+      }
+
+      canvas {
+        width: 100%;
+        height: 300px;
+        display: block;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 12px;
+      }
+
+      /* 进度条 */
       .progress {
-        margin-top: 24px;
+        margin-top: 32px;
         display: flex;
         align-items: center;
-        gap: 12px;
-        font-size: 0.75rem;
+        gap: 16px;
+        font-size: 0.85rem;
         color: var(--muted);
+        padding: 20px 32px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
       }
 
       .progress-bar {
         position: relative;
         flex: 1;
-        height: 1px;
-        background: var(--line);
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
       }
 
       .progress-bar span {
         position: absolute;
         left: 0;
-        top: -1px;
-        height: 3px;
-        background: var(--text);
+        top: 0;
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), #00aaff);
         width: 0;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 10px var(--accent-glow);
       }
 
-      .hint {
-        font-size: 0.75rem;
-        color: var(--muted);
+      #progressLabel {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        min-width: 60px;
+        text-align: right;
       }
 
+      /* 歌词部分 */
       .lyrics {
-        margin-top: 12px;
-        max-width: 720px;
+        margin-top: 32px;
+        max-width: 900px;
+        padding: 40px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
         opacity: 0;
-        transform: translateY(16px);
-        transition: opacity 1.6s ease, transform 1.6s ease;
+        transform: translateY(30px);
+        transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .lyrics h3 {
-        margin: 0 0 12px;
+        margin: 0 0 24px;
         font-family: "Syne", sans-serif;
-        font-size: 1.1rem;
-        letter-spacing: 0.08em;
+        font-size: 1.5rem;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
+        background: linear-gradient(135deg, #fff, var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .lyrics-lines p {
-        margin: 0 0 8px;
-        color: var(--muted);
-        line-height: 1.8;
+        margin: 0 0 12px;
+        color: rgba(248, 248, 248, 0.4);
+        line-height: 1.9;
         opacity: 0;
-        transform: translateY(10px);
-        transition: opacity 1.4s ease, transform 1.4s ease;
+        transform: translateX(-20px);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .lyrics-lines p.label {
-        color: var(--text);
-        letter-spacing: 0.12em;
+        color: var(--accent);
+        letter-spacing: 0.15em;
         text-transform: uppercase;
         font-size: 0.75rem;
-        margin-top: 16px;
+        font-weight: 600;
+        margin-top: 24px;
+        margin-bottom: 16px;
       }
 
       .lyrics-visible .lyrics {
@@ -227,22 +470,45 @@
 
       .lyrics-visible .lyrics-lines p.label {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
       }
 
       .lyrics-lines p.active {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
+        color: var(--text);
       }
 
-      @media (max-width: 700px) {
+      /* 响应式设计 */
+      @media (max-width: 768px) {
         body {
           overflow-y: auto;
+        }
+
+        header {
+          flex-direction: column;
+          padding: 16px 20px;
+        }
+
+        .stage {
+          padding: 32px 24px;
+        }
+
+        .lang-switch {
+          width: 100%;
+          justify-content: center;
+        }
+
+        canvas {
+          height: 200px;
         }
       }
     </style>
   </head>
   <body>
+    <div class="background" id="background"></div>
+    <div class="grid-overlay"></div>
+
     <div class="ui">
       <header>
         <div class="brand">
@@ -250,36 +516,40 @@
           <span data-i18n="brandRole">沉浸式音频工程师</span>
         </div>
         <div class="lang-switch">
-          <button data-lang="zh" class="active">中文</button>
-          <button data-lang="ja">日本語</button>
-          <button data-lang="en">EN</button>
+          <button data-lang="zh" class="active"><span>中文</span></button>
+          <button data-lang="ja"><span>日本語</span></button>
+          <button data-lang="en"><span>EN</span></button>
         </div>
       </header>
 
       <main>
         <section class="stage active" data-stage="0">
           <h1 data-i18n="heroTitle">Bad Apple 风格声波入口</h1>
-          <p data-i18n="heroSubtitle">滚动鼠标，像在黑白胶片中穿梭，解锁不同入口。</p>
+          <p data-i18n="heroSubtitle">滚动鼠标,像在黑白胶片中穿梭,解锁不同入口。</p>
           <div class="controls">
-            <button class="audio-button" id="audioToggle" data-i18n="audioToggle">播放节奏</button>
+            <button class="audio-button" id="audioToggle">
+              <span data-i18n="audioToggle">播放节奏</span>
+            </button>
             <span class="hint" data-i18n="audioHint">使用 Bad Apple 驱动视觉</span>
           </div>
         </section>
 
         <section class="stage" data-stage="1">
           <h2 data-i18n="portfolioTitle">自我介绍与作品集</h2>
-          <p data-i18n="portfolioBody">混音、拟音、Atmos 项目与现场采录，进入我的作品宇宙。</p>
+          <p data-i18n="portfolioBody">混音、拟音、Atmos 项目与现场采录,进入我的作品宇宙。</p>
           <a href="portfolio.html" data-i18n="portfolioCTA">进入作品集</a>
         </section>
 
         <section class="stage" data-stage="2">
           <h2 data-i18n="newyearTitle">2026 新年祝贺</h2>
-          <p data-i18n="newyearBody">一段带有光场与祝词的声音祝福，开启新年的频率。</p>
+          <p data-i18n="newyearBody">一段带有光场与祝词的声音祝福,开启新年的频率。</p>
           <a href="newyear2026.html" data-i18n="newyearCTA">开启祝贺</a>
         </section>
+
         <div class="visualizer-wrap">
           <canvas id="visualizer"></canvas>
         </div>
+
         <section class="lyrics" id="lyrics">
           <h3 data-i18n="lyricsTitle">Lyrics / 光影</h3>
           <div class="lyrics-lines">
@@ -287,15 +557,15 @@
             <p>流れてく 時の中ででも</p>
             <p>気だるさが ほらグルグル廻って</p>
             <p>私から 離れる心も 見えないわ</p>
-            <p>そう知らない？</p>
+            <p>そう知らない?</p>
             <p>自分から 動くこともなく</p>
             <p>時の隙間に 流され続けて</p>
             <p>知らないわ 周りのことなど</p>
             <p>私は私 それだけ</p>
             <p class="label">[Pre-Chorus 1]</p>
-            <p>夢見てる？</p>
-            <p>何も見てない？</p>
-            <p>語るも無駄な 自分の言葉？</p>
+            <p>夢見てる?</p>
+            <p>何も見てない?</p>
+            <p>語るも無駄な 自分の言葉?</p>
             <p>悲しむなんて 疲れるだけよ</p>
             <p>何も感じず 過ごせばいいの</p>
             <p class="label">[Chorus 1]</p>
@@ -304,28 +574,28 @@
             <p>もし私から 動くのならば</p>
             <p>すべて変えるのなら 黒にする</p>
             <p class="label">[Verse 2]</p>
-            <p>こんな自分に 未来はあるの？</p>
-            <p>こんな世界に 私はいるの？</p>
-            <p>今切ないの？ 今悲しいの？</p>
+            <p>こんな自分に 未来はあるの?</p>
+            <p>こんな世界に 私はいるの?</p>
+            <p>今切ないの? 今悲しいの?</p>
             <p>自分の事も わからないまま</p>
             <p>歩むことさえ 疲れるだけよ</p>
             <p>人のことなど 知りもしないわ</p>
             <p>こんな私も 変われるのなら</p>
-            <p>もし変われるのなら 白になる？</p>
+            <p>もし変われるのなら 白になる?</p>
             <p class="label">[Interlude]</p>
             <p class="label">[Verse 3]</p>
             <p>流れてく 時の中ででも</p>
             <p>気だるさがほら グルグル廻って</p>
             <p>私から 離れる心も 見えないわ</p>
-            <p>そう知らない？</p>
+            <p>そう知らない?</p>
             <p>自分から 動くこともなく</p>
             <p>時の隙間に 流され続けて</p>
             <p>知らないわ 周りのことなど</p>
             <p>私は私 それだけ</p>
             <p class="label">[Pre-Chorus 2]</p>
-            <p>夢見てる？</p>
-            <p>何も見てない？</p>
-            <p>語るも無駄な 自分の言葉？</p>
+            <p>夢見てる?</p>
+            <p>何も見てない?</p>
+            <p>語るも無駄な 自分の言葉?</p>
             <p>悲しむなんて 疲れるだけよ</p>
             <p>何も感じず 過ごせばいいの</p>
             <p class="label">[Chorus 2]</p>
@@ -334,17 +604,17 @@
             <p>もし私から 動くのならば</p>
             <p>すべて変えるのなら 黒にする</p>
             <p class="label">[Verse 4]</p>
-            <p>無駄な時間に 未来はあるの？</p>
-            <p>こんな所に 私はいるの？</p>
+            <p>無駄な時間に 未来はあるの?</p>
+            <p>こんな所に 私はいるの?</p>
             <p>私のことを 言えたいならば</p>
             <p>言葉にするのなら「ろくでなし」</p>
-            <p>こんな所に 私はいるの？</p>
-            <p>こんな時間に 私はいるの？</p>
+            <p>こんな所に 私はいるの?</p>
+            <p>こんな時間に 私はいるの?</p>
             <p>こんな私も 変われるのなら</p>
-            <p>もし変われるのなら 白になる？</p>
+            <p>もし変われるのなら 白になる?</p>
             <p class="label">[Bridge]</p>
-            <p>今夢見てる？ なにも見てない？</p>
-            <p>語るも無駄な 自分の言葉？</p>
+            <p>今夢見てる? なにも見てない?</p>
+            <p>語るも無駄な 自分の言葉?</p>
             <p>悲しむなんて 疲れるだけよ</p>
             <p>何も感じず 過ごせばいいの</p>
             <p class="label">[Chorus 3]</p>
@@ -359,14 +629,14 @@
             <p>すべて壊すわ</p>
             <p>悲しむならば</p>
             <p>悲しむならば</p>
-            <p>私の心 白く変われる？</p>
+            <p>私の心 白く変われる?</p>
             <p>貴方の事も</p>
             <p>私のことも</p>
             <p>すべての事も</p>
             <p>まだ知らないの</p>
             <p>重い目蓋を 開けたのならば</p>
             <p>すべて壊すのなら</p>
-            <p>黒になれ！！！</p>
+            <p>黒になれ!!!</p>
           </div>
         </section>
       </main>
@@ -383,35 +653,49 @@
     </audio>
 
     <script>
+      // 创建粒子背景
+      function createParticles() {
+        const background = document.getElementById('background');
+        const particleCount = 30;
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = Math.random() * 100 + '%';
+          particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+          particle.style.animationDelay = Math.random() * 5 + 's';
+          particle.style.opacity = Math.random() * 0.5 + 0.2;
+          background.appendChild(particle);
+        }
+      }
+
+      createParticles();
+
       const translations = {
         zh: {
           pageTitle: "K宇宙入口",
           brandName: "K音频实验室",
           brandRole: "沉浸式音频工程师",
           heroTitle: "Bad Apple 风格声波入口",
-          heroSubtitle: "滚动鼠标，像在黑白胶片中穿梭，解锁不同入口。",
+          heroSubtitle: "滚动鼠标,像在黑白胶片中穿梭,解锁不同入口。",
           audioToggle: "播放节奏",
           audioHint: "使用 Bad Apple 驱动视觉",
-          audioError: "播放失败，请刷新后重试",
+          audioError: "播放失败,请刷新后重试",
           portfolioTitle: "自我介绍与作品集",
-          portfolioBody: "混音、拟音、Atmos 项目与现场采录，进入我的作品宇宙。",
+          portfolioBody: "混音、拟音、Atmos 项目与现场采录,进入我的作品宇宙。",
           portfolioCTA: "进入作品集",
           newyearTitle: "2026 新年祝贺",
-          newyearBody: "一段带有光场与祝词的声音祝福，开启新年的频率。",
+          newyearBody: "一段带有光场与祝词的声音祝福,开启新年的频率。",
           newyearCTA: "开启祝贺",
           scrollHint: "滚动",
-          lyricsTitle: "Lyrics / 光影",
-          lyric1: "黑白之间，静态里藏着旋律。",
-          lyric2: "滚轮轻转，画面逐格浮现。",
-          lyric3: "每一拍都是入口的坐标。",
-          lyric4: "让声音带你进入下一幕。"
+          lyricsTitle: "Lyrics / 光影"
         },
         ja: {
           pageTitle: "Kユニバース・ゲート",
           brandName: "K Audio Lab",
           brandRole: "イマーシブ・オーディオエンジニア",
           heroTitle: "Bad Apple風サウンドゲート",
-          heroSubtitle: "スクロールで白黒フィルムを進み、入口を解放します。",
+          heroSubtitle: "スクロールで白黒フィルムを進み,入口を解放します。",
           audioToggle: "リズムを再生",
           audioHint: "Bad Appleでビジュアルを駆動",
           audioError: "再生に失敗しました",
@@ -422,11 +706,7 @@
           newyearBody: "光の祝福とメッセージで新年の周波数を開く。",
           newyearCTA: "メッセージを開く",
           scrollHint: "スクロール",
-          lyricsTitle: "Lyrics / 光と影",
-          lyric1: "モノクロの静寂に旋律が潜む。",
-          lyric2: "スクロールでフレームが浮かび上がる。",
-          lyric3: "一拍ごとに入口の座標が刻まれる。",
-          lyric4: "音が次の幕へ誘う。"
+          lyricsTitle: "Lyrics / 光と影"
         },
         en: {
           pageTitle: "K Universe Gateway",
@@ -444,11 +724,7 @@
           newyearBody: "A luminous sonic blessing to open the new-year frequency.",
           newyearCTA: "Open greeting",
           scrollHint: "Scroll",
-          lyricsTitle: "Lyrics / Monochrome",
-          lyric1: "Between black and white, a melody hides.",
-          lyric2: "A gentle scroll reveals each frame.",
-          lyric3: "Every beat marks a new doorway.",
-          lyric4: "Let the sound carry you to the next scene."
+          lyricsTitle: "Lyrics / Monochrome"
         }
       };
 
@@ -496,7 +772,7 @@
         if (audioCtx) return;
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
+        analyser.fftSize = 512;
         dataArray = new Uint8Array(analyser.frequencyBinCount);
         const source = audioCtx.createMediaElementSource(audio);
         source.connect(analyser);
@@ -509,20 +785,17 @@
         if (isPlaying) {
           audio.pause();
           isPlaying = false;
-          audioToggle.dataset.playing = "false";
-          audioToggle.textContent = translations[currentLang].audioToggle;
+          audioToggle.querySelector('span').textContent = translations[currentLang].audioToggle;
         } else {
           const playPromise = audio.play();
           if (playPromise && typeof playPromise.catch === "function") {
             playPromise.catch(() => {
               isPlaying = false;
-              audioToggle.dataset.playing = "false";
-              audioToggle.textContent = translations[currentLang].audioError;
+              audioToggle.querySelector('span').textContent = translations[currentLang].audioError;
             });
           }
           isPlaying = true;
-          audioToggle.dataset.playing = "true";
-          audioToggle.textContent = translations[currentLang].audioToggle + " ✓";
+          audioToggle.querySelector('span').textContent = translations[currentLang].audioToggle + " ✓";
         }
       }
 
@@ -531,7 +804,11 @@
         const width = canvas.width / (window.devicePixelRatio || 1);
         const height = canvas.height / (window.devicePixelRatio || 1);
 
-        ctx.fillStyle = "#050505";
+        // 背景渐变
+        const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+        bgGradient.addColorStop(0, 'rgba(0, 20, 30, 0.9)');
+        bgGradient.addColorStop(1, 'rgba(10, 10, 15, 0.9)');
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, width, height);
 
         let energy = 0.2;
@@ -541,33 +818,53 @@
           energy = sum / (dataArray.length * 255);
         }
 
-        const columns = 72;
+        // 绘制音频条
+        const columns = 64;
         const barWidth = width / columns;
         const offset = (Math.sin(timestamp / 1400) + 1) * 0.5;
 
-        ctx.fillStyle = "#ffffff";
+        // 创建渐变色
+        const gradient = ctx.createLinearGradient(0, height, 0, 0);
+        gradient.addColorStop(0, '#00ffff');
+        gradient.addColorStop(0.5, '#00aaff');
+        gradient.addColorStop(1, '#0080ff');
+
+        ctx.fillStyle = gradient;
+
         for (let i = 0; i < columns; i += 1) {
           const value = dataArray ? dataArray[i] / 255 : 0.2 + 0.15 * Math.sin(timestamp / 600 + i * 0.4);
-          const heightScale = 0.4 + energy * 0.7;
+          const heightScale = 0.5 + energy * 0.6;
           const barHeight = value * height * heightScale;
           const x = i * barWidth;
-          const y = height - barHeight - height * 0.2 * offset;
-          ctx.fillRect(x, y, barWidth * 0.6, barHeight);
+          const y = height - barHeight - height * 0.15 * offset;
+
+          // 主条形
+          ctx.fillRect(x, y, barWidth * 0.7, barHeight);
+
+          // 发光效果
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = '#00ffff';
+          ctx.fillRect(x, y, barWidth * 0.7, barHeight);
+          ctx.shadowBlur = 0;
         }
 
-        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-        for (let y = 0; y < height; y += 6) {
+        // 扫描线效果
+        ctx.fillStyle = "rgba(0, 255, 255, 0.05)";
+        for (let y = 0; y < height; y += 4) {
           ctx.fillRect(0, y, width, 1);
         }
 
-        ctx.globalCompositeOperation = "source-over";
-        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-        for (let i = 0; i < 40; i += 1) {
-          const x = (i / 40) * width + Math.sin(timestamp / 900 + i) * 8;
-          ctx.fillRect(x, 0, 1, height);
+        // 波浪线
+        ctx.strokeStyle = `rgba(0, 255, 255, ${0.3 + energy * 0.4})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = 0; x < width; x += 5) {
+          const y = height * 0.5 + Math.sin(x / 30 + timestamp / 500) * 20 * (1 + energy);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
         }
+        ctx.stroke();
 
-        ctx.globalCompositeOperation = "source-over";
         requestAnimationFrame(draw);
       }
 
@@ -585,13 +882,12 @@
       }
 
       function animateProgress() {
-        progress += (targetProgress - progress) * 0.05;
+        progress += (targetProgress - progress) * 0.08;
         setStage(progress);
         requestAnimationFrame(animateProgress);
       }
 
       const lyricLines = Array.from(document.querySelectorAll(".lyrics-lines p"));
-
       lyricLines.forEach((line, index) => {
         line.dataset.index = index;
       });
