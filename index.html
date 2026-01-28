@@ -1149,10 +1149,87 @@
       let audioLoaded = false;
       let userInteracted = false;
 
-      // 点阵配置
-      const CELL_SIZE = 10;  // 网格大小
-      const SHAPE = 'square'; // 形状：square 或 circle
-      const GAP = 1;          // 间隙
+      // 点阵配置 (来自 index sample.html)
+      const CELL_SIZE = 18; // 密度适中
+      const LINE_W = 1.5;   // 精致线条
+
+      // 颜色配置 - 适配深色主题
+      const COLOR_INK = '#00ffff';  // 主体颜色（青色）
+      const COLOR_DOT = '#004444';  // 背景网点颜色（暗青色）
+
+      // 绘图工具 - 形状系统
+      const Shapes = {
+        // 核心逻辑：所有形状都支持 size 参数
+        // 当 size 很小时，它们看起来都是点
+        // 当 size 变大时，它们显露出原本的几何特征
+
+        // 空心圆
+        circle: (ctx, x, y, s) => {
+            const r = Math.max(0.5, s/2);
+            ctx.beginPath();
+            ctx.arc(x + CELL_SIZE/2, y + CELL_SIZE/2, r, 0, Math.PI*2);
+
+            // 如果尺寸很小，画实心点 (背景态)
+            if (s < 4) {
+                ctx.fillStyle = COLOR_DOT;
+                ctx.fill();
+            } else {
+                // 尺寸大，画空心圆 (主体态)
+                ctx.strokeStyle = COLOR_INK;
+                ctx.lineWidth = LINE_W;
+                ctx.stroke();
+            }
+        },
+
+        // 空心方块 (静止)
+        rect: (ctx, x, y, s) => {
+            if (s < 4) {
+                // 小尺寸退化为点
+                const dotS = Math.max(1.5, s/2);
+                ctx.fillStyle = COLOR_DOT;
+                ctx.fillRect(x + (CELL_SIZE-dotS)/2, y + (CELL_SIZE-dotS)/2, dotS, dotS);
+            } else {
+                ctx.strokeStyle = COLOR_INK;
+                ctx.lineWidth = LINE_W;
+                const offset = (CELL_SIZE - s) / 2;
+                ctx.strokeRect(x + offset, y + offset, s, s);
+            }
+        },
+
+        // 旋转十字
+        cross: (ctx, x, y, s, angle) => {
+            if (s < 4) {
+                // 小尺寸退化为点
+                const r = Math.max(0.5, s/3);
+                ctx.beginPath();
+                ctx.arc(x + CELL_SIZE/2, y + CELL_SIZE/2, r, 0, Math.PI*2);
+                ctx.fillStyle = COLOR_DOT;
+                ctx.fill();
+            } else {
+                const cx = x + CELL_SIZE/2;
+                const cy = y + CELL_SIZE/2;
+                const len = s * 0.7;
+
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate(angle);
+                ctx.strokeStyle = COLOR_INK;
+                ctx.lineWidth = LINE_W;
+
+                ctx.beginPath();
+                ctx.moveTo(-len, 0); ctx.lineTo(len, 0);
+                ctx.moveTo(0, -len); ctx.lineTo(0, len);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+      };
+
+      // 伪随机哈希 (决定每个位置是什么形状)
+      // 去除了时间因素，确保位置固定
+      function pseudoRandom(x, y) {
+          return Math.abs(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1;
+      }
 
       let startBtn;
       let splashHint;
@@ -1689,11 +1766,14 @@
         halftoneCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
-      // 点阵渲染函数
+      // 点阵渲染函数 - 使用 sample 的 Morphing Logic
       function drawHalftone() {
         if (!bgVideo || bgVideo.paused || bgVideo.ended || !isVideoPlaying) {
           return;
         }
+
+        const startTime = Date.now();
+        const time = startTime / 1000;
 
         const width = halftoneCanvas.width / (window.devicePixelRatio || 1);
         const height = halftoneCanvas.height / (window.devicePixelRatio || 1);
@@ -1736,37 +1816,53 @@
         // 清空主 canvas
         halftoneCtx.clearRect(0, 0, width, height);
 
-        // 设置绘图样式
-        halftoneCtx.fillStyle = '#00ffff'; // 青色点阵
+        // 十字旋转角度 (保持旋转，但形状本身不换)
+        const rot = time * 0.8;
 
-        // 遍历并绘制点阵
+        // 遍历并绘制点阵 - Morphing Logic
         for (let y = 0; y < rows; y++) {
           for (let x = 0; x < cols; x++) {
-            const index = (y * cols + x) * 4;
-            const r = frameData[index];
-            const g = frameData[index + 1];
-            const b = frameData[index + 2];
+            // 静态随机种子 (位置锚定)
+            const rng = pseudoRandom(x, y);
 
-            // 计算亮度
-            const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            // 1. 获取亮度并反转 (Bad Apple 主体是黑的)
+            const i = (y * cols + x) * 4;
+            const r = frameData[i];
+            const g = frameData[i+1];
+            const b = frameData[i+2];
+            const brightness = (r + g + b) / (255 * 3);
 
-            // 跳过太暗的像素
-            if (brightness < 0.05) continue;
+            // 2. 映射逻辑 (Morphing Logic)
+            // 我们希望：
+            // 白背景 (brightness -> 1) => 小点 (size -> 2)
+            // 黑主体 (brightness -> 0) => 大图形 (size -> 10)
 
-            // 计算位置
+            // 线性插值
+            // activeFactor: 0 (背景) -> 1 (主体)
+            const activeFactor = 1.0 - brightness;
+
+            // 增加对比度，让变化更干脆一点，但保留过渡
+            // 使用幂函数曲线，让中间态少一点
+            const contrastFactor = Math.pow(activeFactor, 3);
+
+            // 计算最终尺寸
+            // 最小 2px (网点)，最大 10px (图形)
+            const targetSize = 2 + (contrastFactor * 8);
+
             const posX = x * CELL_SIZE;
             const posY = y * CELL_SIZE;
 
-            // 根据亮度决定大小
-            const size = (CELL_SIZE - GAP) * brightness;
-            const offset = (CELL_SIZE - size) / 2;
-
-            if (SHAPE === 'square') {
-              halftoneCtx.fillRect(posX + offset, posY + offset, size, size);
-            } else if (SHAPE === 'circle') {
-              halftoneCtx.beginPath();
-              halftoneCtx.arc(posX + CELL_SIZE/2, posY + CELL_SIZE/2, size/2, 0, Math.PI * 2);
-              halftoneCtx.fill();
+            // 3. 绘制
+            // 形状类型由 rng 决定，永久固定
+            if (rng < 0.45) {
+                // 十字 (带旋转)
+                Shapes.cross(halftoneCtx, posX, posY, targetSize, rot + rng * 10);
+            } else if (rng < 0.7) {
+                // 圆形
+                Shapes.circle(halftoneCtx, posX, posY, targetSize);
+            } else {
+                // 方块 (静止)
+                Shapes.rect(halftoneCtx, posX, posY, targetSize);
             }
           }
         }
