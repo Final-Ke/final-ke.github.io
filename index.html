@@ -33,11 +33,17 @@
         overflow: hidden;
       }
 
+      .visualizer-wrap {
+        margin-top: 24px;
+        border: 1px solid var(--line);
+        padding: 12px;
+      }
+
       canvas {
-        position: fixed;
-        inset: 0;
         width: 100%;
-        height: 100%;
+        height: 260px;
+        display: block;
+        background: #050505;
       }
 
       .ui {
@@ -91,8 +97,10 @@
 
       main {
         flex: 1;
-        display: grid;
-        align-items: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 28px;
       }
 
       .stage {
@@ -150,7 +158,7 @@
       }
 
       .progress {
-        margin-top: auto;
+        margin-top: 24px;
         display: flex;
         align-items: center;
         gap: 12px;
@@ -183,24 +191,10 @@
         body {
           overflow-y: auto;
         }
-
-        canvas {
-          position: fixed;
-        }
-
-        .ui {
-          padding-bottom: 40px;
-        }
-
-        .progress {
-          margin-top: 30px;
-        }
       }
     </style>
   </head>
   <body>
-    <canvas id="visualizer"></canvas>
-
     <div class="ui">
       <header>
         <div class="brand">
@@ -235,6 +229,9 @@
           <p data-i18n="newyearBody">一段带有光场与祝词的声音祝福，开启新年的频率。</p>
           <a href="newyear2026.html" data-i18n="newyearCTA">开启祝贺</a>
         </section>
+        <div class="visualizer-wrap">
+          <canvas id="visualizer"></canvas>
+        </div>
       </main>
 
       <div class="progress">
@@ -244,7 +241,7 @@
       </div>
     </div>
 
-    <audio id="bgAudio" preload="none">
+    <audio id="bgAudio" preload="metadata">
       <source src="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Bad%20Apple%202%20Live.mp3" type="audio/mpeg" />
     </audio>
 
@@ -334,8 +331,9 @@
 
       function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
-        canvas.width = window.innerWidth * dpr;
-        canvas.height = window.innerHeight * dpr;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
@@ -420,12 +418,12 @@
 
       function onWheel(event) {
         event.preventDefault();
-        targetProgress += Math.sign(event.deltaY) * 0.12;
+        targetProgress += Math.sign(event.deltaY) * 0.06;
         targetProgress = Math.min(Math.max(targetProgress, 0), 1);
       }
 
       function animateProgress() {
-        progress += (targetProgress - progress) * 0.08;
+        progress += (targetProgress - progress) * 0.05;
         setStage(progress);
         requestAnimationFrame(animateProgress);
       }
