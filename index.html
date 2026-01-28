@@ -241,8 +241,8 @@
       </div>
     </div>
 
-    <audio id="bgAudio" preload="metadata">
-      <source src="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Bad%20Apple%202%20Live.mp3" type="audio/mpeg" />
+    <audio id="bgAudio" preload="metadata" crossorigin="anonymous">
+      <source src="https://raw.githubusercontent.com/Final-Ke/final-ke.github.io/main/Bad%20Apple%202%20Live.mp3" type="audio/mpeg" />
     </audio>
 
     <script>
@@ -255,6 +255,7 @@
           heroSubtitle: "滚动鼠标，像在黑白胶片中穿梭，解锁不同入口。",
           audioToggle: "播放节奏",
           audioHint: "使用 Bad Apple 驱动视觉",
+          audioError: "播放失败，请刷新后重试",
           portfolioTitle: "自我介绍与作品集",
           portfolioBody: "混音、拟音、Atmos 项目与现场采录，进入我的作品宇宙。",
           portfolioCTA: "进入作品集",
@@ -271,6 +272,7 @@
           heroSubtitle: "スクロールで白黒フィルムを進み、入口を解放します。",
           audioToggle: "リズムを再生",
           audioHint: "Bad Appleでビジュアルを駆動",
+          audioError: "再生に失敗しました",
           portfolioTitle: "プロフィール & ポートフォリオ",
           portfolioBody: "ミックス、フォーリー、Atmos案件、ライブ収録の世界へ。",
           portfolioCTA: "ポートフォリオを見る",
@@ -287,6 +289,7 @@
           heroSubtitle: "Scroll like a monochrome reel to reveal each entrance.",
           audioToggle: "Play rhythm",
           audioHint: "Driven by Bad Apple",
+          audioError: "Playback failed",
           portfolioTitle: "Portfolio & Bio",
           portfolioBody: "Mixing, Foley, Atmos sessions, and live capture — step inside.",
           portfolioCTA: "Enter portfolio",
@@ -357,7 +360,14 @@
           audioToggle.dataset.playing = "false";
           audioToggle.textContent = translations[currentLang].audioToggle;
         } else {
-          audio.play();
+          const playPromise = audio.play();
+          if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(() => {
+              isPlaying = false;
+              audioToggle.dataset.playing = "false";
+              audioToggle.textContent = translations[currentLang].audioError;
+            });
+          }
           isPlaying = true;
           audioToggle.dataset.playing = "true";
           audioToggle.textContent = translations[currentLang].audioToggle + " ✓";
