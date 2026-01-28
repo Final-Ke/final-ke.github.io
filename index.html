@@ -534,6 +534,13 @@
         opacity: 0;
         transform: translateY(40px);
         transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        cursor: ns-resize;
+      }
+
+      .lyrics-section.manual-mode {
+        border-color: var(--accent);
+        box-shadow: 0 0 40px var(--accent-glow);
       }
 
       .lyrics-section.visible {
@@ -551,6 +558,37 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .lyrics-mode-indicator {
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        padding: 6px 14px;
+        border-radius: 8px;
+        background: rgba(0, 255, 255, 0.15);
+        color: var(--accent);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .lyrics-section.manual-mode .lyrics-mode-indicator {
+        opacity: 1;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      .lyrics-container {
+        position: relative;
+        overflow: hidden;
+        max-height: 400px;
+      }
+
+      .lyrics-lines {
+        position: relative;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .lyrics-lines p {
@@ -560,6 +598,38 @@
         opacity: 0;
         transform: translateX(-20px);
         transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        padding-left: 24px;
+      }
+
+      .lyrics-lines p::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .lyrics-lines p.current::before {
+        opacity: 1;
+        animation: markerPulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes markerPulse {
+        0%, 100% {
+          transform: translateY(-50%) scale(1);
+          box-shadow: 0 0 0 0 var(--accent-glow);
+        }
+        50% {
+          transform: translateY(-50%) scale(1.3);
+          box-shadow: 0 0 0 8px rgba(0, 255, 255, 0);
+        }
       }
 
       .lyrics-lines p.label {
@@ -695,8 +765,12 @@
       </div>
 
       <section class="lyrics-section" id="lyrics">
-        <h3 data-i18n="lyricsTitle">Lyrics / 光影</h3>
-        <div class="lyrics-lines">
+        <h3>
+          <span data-i18n="lyricsTitle">Lyrics / 光影</span>
+          <span class="lyrics-mode-indicator" data-i18n="lyricsManualMode">手动模式</span>
+        </h3>
+        <div class="lyrics-container">
+          <div class="lyrics-lines">
           <p class="label">[Verse 1]</p>
           <p>流れてく 時の中ででも</p>
           <p>気だるさが ほらグルグル廻って</p>
@@ -781,6 +855,7 @@
           <p>重い目蓋を 開けたのならば</p>
           <p>すべて壊すのなら</p>
           <p>黒になれ!!!</p>
+          </div>
         </div>
       </section>
     </main>
@@ -822,7 +897,8 @@
           newyearTitle: "2026 新年祝贺",
           newyearBody: "一段带有光场与祝词的声音祝福，开启新年的频率。",
           newyearCTA: "开启祝贺",
-          lyricsTitle: "Lyrics / 光影"
+          lyricsTitle: "Lyrics / 光影",
+          lyricsManualMode: "手动模式"
         },
         ja: {
           pageTitle: "Kユニバース・ゲート",
@@ -839,7 +915,8 @@
           newyearTitle: "2026 新年のご挨拶",
           newyearBody: "光の祝福とメッセージで新年の周波数を開く。",
           newyearCTA: "メッセージを開く",
-          lyricsTitle: "Lyrics / 光と影"
+          lyricsTitle: "Lyrics / 光と影",
+          lyricsManualMode: "手動モード"
         },
         en: {
           pageTitle: "K Universe Gateway",
@@ -856,7 +933,8 @@
           newyearTitle: "2026 New Year",
           newyearBody: "A luminous sonic blessing to open the new-year frequency.",
           newyearCTA: "Open greeting",
-          lyricsTitle: "Lyrics / Monochrome"
+          lyricsTitle: "Lyrics / Monochrome",
+          lyricsManualMode: "Manual Mode"
         }
       };
 
@@ -977,24 +1055,111 @@
         }
       }
 
-      // 歌词同步
+      // 歌词同步与交互
       const lyricLines = Array.from(document.querySelectorAll(".lyrics-lines p"));
+      const lyricsContainer = document.querySelector(".lyrics-lines");
+      let isManualMode = false;
+      let manualScrollTimer = null;
+      let manualLyricIndex = 0;
+
       lyricLines.forEach((line, index) => {
         line.dataset.index = index;
       });
 
+      // 获取非标签的歌词行
+      const contentLines = lyricLines.filter(line => !line.classList.contains("label"));
+
       function updateLyrics() {
-        if (!audio.duration) return;
+        if (!audio.duration || isManualMode) return;
         const current = audio.currentTime;
-        lyricLines.forEach((line) => {
+        let currentLineIndex = -1;
+
+        lyricLines.forEach((line, index) => {
           if (line.classList.contains("label")) return;
           const start = Number(line.dataset.time || line.dataset.index) * 3;
-          line.classList.toggle("active", current >= start);
+          const isActive = current >= start;
+          line.classList.toggle("active", isActive);
+
+          if (isActive) {
+            currentLineIndex = index;
+          }
         });
+
+        // 标记当前播放的行
+        lyricLines.forEach((line, index) => {
+          line.classList.toggle("current", index === currentLineIndex);
+        });
+
+        // 自动滚动到当前行（居中显示）
+        if (currentLineIndex >= 0 && lyricLines[currentLineIndex]) {
+          const currentLine = lyricLines[currentLineIndex];
+          const container = document.querySelector(".lyrics-container");
+          const lineTop = currentLine.offsetTop;
+          const containerHeight = container.clientHeight;
+          const lineHeight = currentLine.clientHeight;
+          const scrollTarget = lineTop - containerHeight / 2 + lineHeight / 2;
+
+          lyricsContainer.style.transform = `translateY(-${Math.max(0, scrollTarget)}px)`;
+        }
+      }
+
+      function setManualMode(enabled) {
+        isManualMode = enabled;
+        lyricsSection.classList.toggle("manual-mode", enabled);
+      }
+
+      // 鼠标滚轮控制
+      lyricsSection.addEventListener("wheel", (e) => {
+        if (!lyricsSection.classList.contains("visible")) return;
+
+        e.preventDefault();
+        setManualMode(true);
+
+        // 清除之前的计时器
+        clearTimeout(manualScrollTimer);
+
+        // 计算手动滚动的歌词索引
+        const delta = Math.sign(e.deltaY);
+        manualLyricIndex = Math.max(0, Math.min(contentLines.length - 1, manualLyricIndex + delta));
+
+        // 更新歌词显示
+        updateManualLyrics();
+
+        // 3秒后恢复自动同步
+        manualScrollTimer = setTimeout(() => {
+          setManualMode(false);
+          updateLyrics();
+        }, 3000);
+      }, { passive: false });
+
+      function updateManualLyrics() {
+        const container = document.querySelector(".lyrics-container");
+        const currentLine = contentLines[manualLyricIndex];
+
+        if (!currentLine) return;
+
+        // 更新激活状态
+        lyricLines.forEach((line, index) => {
+          const contentIndex = contentLines.indexOf(line);
+          line.classList.toggle("active", contentIndex >= 0 && contentIndex <= manualLyricIndex);
+          line.classList.toggle("current", line === currentLine);
+        });
+
+        // 滚动到当前行
+        const lineTop = currentLine.offsetTop;
+        const containerHeight = container.clientHeight;
+        const lineHeight = currentLine.clientHeight;
+        const scrollTarget = lineTop - containerHeight / 2 + lineHeight / 2;
+
+        lyricsContainer.style.transform = `translateY(-${Math.max(0, scrollTarget)}px)`;
       }
 
       audio.addEventListener("timeupdate", updateLyrics);
-      audio.addEventListener("seeked", updateLyrics);
+      audio.addEventListener("seeked", () => {
+        if (!isManualMode) {
+          updateLyrics();
+        }
+      });
 
       // 卡片鼠标跟随效果
       document.querySelectorAll('.portal-card').forEach(card => {

@@ -141,6 +141,7 @@
         justify-content: space-between;
         align-items: center;
         gap: 24px;
+        flex-wrap: wrap;
       }
 
       .brand {
@@ -239,6 +240,42 @@
       .lang-switch button:hover::after {
         opacity: 0.3;
         transform: scale(1);
+      }
+
+      /* Home link */
+      .home-link {
+        padding: 10px 24px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .home-link::before {
+        content: '←';
+        font-size: 1.2em;
+        transition: transform 0.4s;
+      }
+
+      .home-link:hover {
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        color: var(--bg);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px var(--accent-glow);
+      }
+
+      .home-link:hover::before {
+        transform: translateX(-4px);
       }
 
       /* Main Content */
@@ -807,10 +844,13 @@
           <div class="brand-name" data-i18n="brandName">K音频实验室</div>
           <div class="brand-role" data-i18n="brandRole">沉浸式音频工程师</div>
         </div>
-        <div class="lang-switch">
-          <button data-lang="zh" class="active"><span>中文</span></button>
-          <button data-lang="ja"><span>日本語</span></button>
-          <button data-lang="en"><span>EN</span></button>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <a href="index.html" class="home-link" data-i18n="homeLink">返回主页</a>
+          <div class="lang-switch">
+            <button data-lang="zh" class="active"><span>中文</span></button>
+            <button data-lang="ja"><span>日本語</span></button>
+            <button data-lang="en"><span>EN</span></button>
+          </div>
         </div>
       </div>
     </header>
@@ -921,6 +961,7 @@
           pageTitle: "K的音频作品集",
           brandName: "K音频实验室",
           brandRole: "沉浸式音频工程师",
+          homeLink: "返回主页",
           heroTitle: "雕刻电影级声音",
           heroSubtitle: "我是K，驻东京的音频工程师，将模拟质感与空间混音结合，为电影、游戏和装置艺术打造声音。",
           heroCTA: "试听代表作",
@@ -950,6 +991,7 @@
           pageTitle: "Kのオーディオポートフォリオ",
           brandName: "K Audio Lab",
           brandRole: "イマーシブ・オーディオエンジニア",
+          homeLink: "ホームに戻る",
           heroTitle: "映画級サウンドを彫刻する",
           heroSubtitle: "東京拠点のエンジニアKです。アナログの温度感と空間ミックスを融合し，映画・ゲーム・インスタレーションの世界観を支えます。",
           heroCTA: "作品を聴く",
@@ -979,6 +1021,7 @@
           pageTitle: "K's Audio Portfolio",
           brandName: "K Audio Lab",
           brandRole: "Immersive Audio Engineer",
+          homeLink: "Back to Home",
           heroTitle: "Crafting Cinematic Soundscapes",
           heroSubtitle: "I'm K, a Tokyo-based audio engineer blending analog warmth with spatial mixing for film, games, and installations.",
           heroCTA: "Listen to my work",
