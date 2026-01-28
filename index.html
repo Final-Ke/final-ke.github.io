@@ -14,13 +14,10 @@
       :root {
         color-scheme: dark;
         --bg: #0a0a0f;
-        --bg-secondary: #13131a;
         --text: #f8f8f8;
         --muted: rgba(248, 248, 248, 0.65);
-        --line: rgba(248, 248, 248, 0.15);
         --accent: #00ffff;
         --accent-glow: rgba(0, 255, 255, 0.3);
-        --card-bg: rgba(255, 255, 255, 0.03);
         --glass-bg: rgba(255, 255, 255, 0.05);
         --glass-border: rgba(255, 255, 255, 0.1);
       }
@@ -36,11 +33,86 @@
         font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
         background: var(--bg);
         color: var(--text);
-        overflow: hidden;
+        overflow-x: hidden;
         position: relative;
       }
 
-      /* 动态背景粒子 */
+      /* 开屏动画 */
+      .splash-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: linear-gradient(135deg, #0a0a0f 0%, #1a0a1f 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.8s ease-out;
+      }
+
+      .splash-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .splash-content {
+        text-align: center;
+        animation: splashPulse 2s ease-in-out;
+      }
+
+      @keyframes splashPulse {
+        0%, 100% {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+        50% {
+          transform: scale(1.05);
+          opacity: 1;
+        }
+      }
+
+      .splash-icon {
+        font-size: 5rem;
+        margin-bottom: 32px;
+        animation: iconSpin 2s ease-in-out;
+      }
+
+      @keyframes iconSpin {
+        0% {
+          transform: rotate(0deg) scale(0.5);
+          opacity: 0;
+        }
+        50% {
+          transform: rotate(180deg) scale(1.1);
+        }
+        100% {
+          transform: rotate(360deg) scale(1);
+          opacity: 1;
+        }
+      }
+
+      .splash-text {
+        font-family: "Syne", sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 16px;
+      }
+
+      .splash-hint {
+        color: var(--muted);
+        font-size: 1rem;
+        animation: blink 1.5s ease-in-out infinite;
+      }
+
+      @keyframes blink {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+      }
+
+      /* 背景 */
       .background {
         position: fixed;
         inset: 0;
@@ -88,34 +160,28 @@
         pointer-events: none;
       }
 
-      .ui {
-        position: relative;
-        z-index: 2;
-        min-height: 100vh;
+      /* 固定BGM控制器 */
+      .bgm-controller {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 100;
         display: flex;
-        flex-direction: column;
-        padding: 32px clamp(24px, 5vw, 100px);
-      }
-
-      /* Header 设计 */
-      header {
-        display: flex;
-        justify-content: space-between;
         align-items: center;
-        gap: 20px;
-        padding: 20px 32px;
+        gap: 16px;
+        padding: 16px 24px;
         background: var(--glass-bg);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(30px);
         border: 1px solid var(--glass-border);
         border-radius: 20px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        animation: slideDown 0.6s ease-out;
+        animation: slideDown 0.8s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       @keyframes slideDown {
         from {
           opacity: 0;
-          transform: translateY(-30px);
+          transform: translateY(-40px);
         }
         to {
           opacity: 1;
@@ -123,35 +189,114 @@
         }
       }
 
-      .brand {
+      .bgm-toggle {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 2px solid var(--accent);
+        background: rgba(0, 255, 255, 0.1);
+        color: var(--accent);
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .bgm-toggle::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--accent);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .bgm-toggle span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .bgm-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px var(--accent-glow);
+      }
+
+      .bgm-toggle:hover::before {
+        opacity: 0.2;
+      }
+
+      .bgm-toggle.playing {
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          box-shadow: 0 0 20px var(--accent-glow);
+        }
+        50% {
+          box-shadow: 0 0 40px var(--accent-glow);
+        }
+      }
+
+      .bgm-info {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 4px;
       }
 
-      .brand span:first-child {
-        font-family: "Syne", sans-serif;
-        font-size: 1.2rem;
-        font-weight: 800;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        background: linear-gradient(135deg, #fff, var(--accent));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+      .bgm-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--accent);
       }
 
-      .brand span:last-child {
-        font-size: 0.85rem;
+      .bgm-status {
+        font-size: 0.75rem;
         color: var(--muted);
       }
 
+      /* 可视化器 */
+      .visualizer-fixed {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 150px;
+        z-index: 50;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.8s;
+      }
+
+      .visualizer-fixed.active {
+        opacity: 1;
+      }
+
+      #vizCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      /* 语言切换 */
       .lang-switch {
+        position: fixed;
+        top: 24px;
+        left: 24px;
+        z-index: 100;
         display: flex;
         gap: 8px;
-        padding: 4px;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 12px;
+        padding: 8px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(30px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.8s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .lang-switch button {
@@ -159,7 +304,7 @@
         border: none;
         color: var(--muted);
         padding: 8px 18px;
-        border-radius: 8px;
+        border-radius: 10px;
         cursor: pointer;
         font-size: 0.85rem;
         font-weight: 500;
@@ -172,7 +317,7 @@
         position: absolute;
         inset: 0;
         background: linear-gradient(135deg, var(--accent), #00aaff);
-        border-radius: 8px;
+        border-radius: 10px;
         opacity: 0;
         transition: opacity 0.3s;
       }
@@ -197,245 +342,209 @@
 
       /* Main Content */
       main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 40px;
-        padding: 60px 0;
-      }
-
-      .stage {
-        max-width: 800px;
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        padding: 48px;
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 28px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        opacity: 0;
-        transform: translateY(40px) scale(0.95);
-        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
-        overflow: hidden;
+        z-index: 2;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 120px clamp(24px, 5vw, 100px) 200px;
       }
 
-      .stage::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        transition: left 0.6s;
+      .hero-title {
+        text-align: center;
+        margin-bottom: 80px;
+        animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      .stage:hover::before {
-        left: 100%;
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
-      .stage.active {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-
-      .stage h1,
-      .stage h2 {
+      .hero-title h1 {
         font-family: "Syne", sans-serif;
-        letter-spacing: 0.02em;
-        line-height: 1.2;
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
         font-weight: 800;
-      }
-
-      .stage h1 {
-        font-size: clamp(2.5rem, 5vw, 4rem);
         background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        margin-bottom: 20px;
+        line-height: 1.2;
       }
 
-      .stage h2 {
-        font-size: clamp(1.8rem, 4vw, 2.5rem);
-      }
-
-      .stage p {
+      .hero-title p {
         color: var(--muted);
+        font-size: 1.1rem;
         line-height: 1.8;
-        font-size: 1.05rem;
       }
 
-      .stage a {
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-        color: var(--bg);
-        background: linear-gradient(135deg, var(--accent), #00aaff);
-        text-decoration: none;
-        padding: 16px 32px;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 20px var(--accent-glow);
+      /* 入口卡片容器 */
+      .portals-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 48px;
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      .portal-card {
         position: relative;
+        padding: 60px 48px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(30px);
+        border: 1px solid var(--glass-border);
+        border-radius: 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
+        animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1);
+        animation-fill-mode: both;
       }
 
-      .stage a::after {
-        content: '→';
-        transition: transform 0.3s;
+      .portal-card:nth-child(1) {
+        animation-delay: 0.2s;
       }
 
-      .stage a:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px var(--accent-glow);
+      .portal-card:nth-child(2) {
+        animation-delay: 0.4s;
       }
 
-      .stage a:hover::after {
-        transform: translateX(4px);
-      }
-
-      .controls {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-        margin-top: 16px;
-        flex-wrap: wrap;
-      }
-
-      .audio-button {
-        border: 2px solid var(--accent);
-        background: rgba(0, 255, 255, 0.1);
-        color: var(--accent);
-        padding: 12px 24px;
-        border-radius: 12px;
-        cursor: pointer;
-        font-size: 0.95rem;
-        font-weight: 600;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .audio-button::before {
+      .portal-card::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: var(--accent);
+        background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--accent-glow), transparent 60%);
         opacity: 0;
-        transition: opacity 0.3s;
+        transition: opacity 0.4s;
       }
 
-      .audio-button span {
+      .portal-card:hover::before {
+        opacity: 1;
+      }
+
+      .portal-card:hover {
+        transform: scale(1.05) translateY(-12px);
+        border-color: var(--accent);
+        box-shadow: 0 32px 100px var(--accent-glow);
+      }
+
+      .portal-icon {
+        font-size: 4rem;
+        margin-bottom: 24px;
+        display: inline-block;
+        filter: drop-shadow(0 0 20px var(--accent-glow));
+        animation: iconFloat 3s ease-in-out infinite;
+      }
+
+      @keyframes iconFloat {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .portal-card h2 {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        font-weight: 800;
+        margin-bottom: 20px;
+        color: var(--accent);
         position: relative;
         z-index: 1;
       }
 
-      .audio-button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 20px var(--accent-glow);
-      }
-
-      .audio-button:hover::before {
-        opacity: 0.2;
-      }
-
-      .hint {
-        font-size: 0.85rem;
+      .portal-card p {
         color: var(--muted);
-        opacity: 0.8;
-      }
-
-      /* 可视化器设计 */
-      .visualizer-wrap {
-        margin-top: 32px;
-        padding: 24px;
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        transition: all 0.4s;
-      }
-
-      .visualizer-wrap:hover {
-        border-color: var(--accent);
-        box-shadow: 0 8px 40px var(--accent-glow);
-      }
-
-      canvas {
-        width: 100%;
-        height: 300px;
-        display: block;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 12px;
-      }
-
-      /* 进度条 */
-      .progress {
-        margin-top: 32px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        font-size: 0.85rem;
-        color: var(--muted);
-        padding: 20px 32px;
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 16px;
-      }
-
-      .progress-bar {
+        line-height: 1.8;
+        font-size: 1.05rem;
+        margin-bottom: 32px;
         position: relative;
-        flex: 1;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 2px;
+        z-index: 1;
+      }
+
+      .portal-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 32px;
+        border-radius: 12px;
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--accent), #00aaff);
+        color: var(--bg);
+        cursor: pointer;
+        text-decoration: none;
+        position: relative;
         overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px var(--accent-glow);
+        z-index: 1;
       }
 
-      .progress-bar span {
+      .portal-link::before {
+        content: '';
         position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        background: linear-gradient(90deg, var(--accent), #00aaff);
-        width: 0;
-        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 10px var(--accent-glow);
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s;
       }
 
-      #progressLabel {
-        font-family: "Syne", sans-serif;
-        font-weight: 700;
-        min-width: 60px;
-        text-align: right;
+      .portal-link::after {
+        content: '→';
+        font-size: 1.3em;
+        transition: transform 0.4s;
       }
 
-      /* 歌词部分 */
-      .lyrics {
-        margin-top: 32px;
+      .portal-link:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 12px 48px var(--accent-glow);
+      }
+
+      .portal-link:hover::before {
+        transform: translateX(100%);
+      }
+
+      .portal-link:hover::after {
+        transform: translateX(6px);
+      }
+
+      /* 歌词 */
+      .lyrics-section {
         max-width: 900px;
-        padding: 40px;
+        width: 100%;
+        margin-top: 80px;
+        padding: 48px;
         background: var(--glass-bg);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(30px);
         border: 1px solid var(--glass-border);
-        border-radius: 20px;
+        border-radius: 28px;
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(40px);
         transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      .lyrics h3 {
-        margin: 0 0 24px;
+      .lyrics-section.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .lyrics-section h3 {
+        margin-bottom: 32px;
         font-family: "Syne", sans-serif;
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         background: linear-gradient(135deg, #fff, var(--accent));
@@ -463,12 +572,7 @@
         margin-bottom: 16px;
       }
 
-      .lyrics-visible .lyrics {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .lyrics-visible .lyrics-lines p.label {
+      .lyrics-section.visible .lyrics-lines p.label {
         opacity: 1;
         transform: translateX(0);
       }
@@ -479,185 +583,217 @@
         color: var(--text);
       }
 
-      /* 响应式设计 */
+      /* 响应式 */
+      @media (max-width: 1024px) {
+        .portals-container {
+          grid-template-columns: 1fr;
+          gap: 32px;
+        }
+      }
+
       @media (max-width: 768px) {
-        body {
-          overflow-y: auto;
+        .bgm-controller {
+          top: 16px;
+          right: 16px;
+          padding: 12px 16px;
+          gap: 12px;
         }
 
-        header {
-          flex-direction: column;
-          padding: 16px 20px;
+        .bgm-toggle {
+          width: 48px;
+          height: 48px;
+          font-size: 1.2rem;
         }
 
-        .stage {
-          padding: 32px 24px;
+        .bgm-info {
+          display: none;
         }
 
         .lang-switch {
-          width: 100%;
-          justify-content: center;
+          top: 16px;
+          left: 16px;
         }
 
-        canvas {
-          height: 200px;
+        main {
+          padding: 100px 24px 180px;
+        }
+
+        .hero-title {
+          margin-bottom: 60px;
+        }
+
+        .portal-card {
+          padding: 40px 32px;
+        }
+
+        .portals-container {
+          gap: 24px;
+        }
+
+        .visualizer-fixed {
+          height: 100px;
         }
       }
     </style>
   </head>
   <body>
-    <div class="background" id="background"></div>
-    <div class="grid-overlay"></div>
-
-    <div class="ui">
-      <header>
-        <div class="brand">
-          <span data-i18n="brandName">K Audio Lab</span>
-          <span data-i18n="brandRole">沉浸式音频工程师</span>
-        </div>
-        <div class="lang-switch">
-          <button data-lang="zh" class="active"><span>中文</span></button>
-          <button data-lang="ja"><span>日本語</span></button>
-          <button data-lang="en"><span>EN</span></button>
-        </div>
-      </header>
-
-      <main>
-        <section class="stage active" data-stage="0">
-          <h1 data-i18n="heroTitle">Bad Apple 风格声波入口</h1>
-          <p data-i18n="heroSubtitle">滚动鼠标,像在黑白胶片中穿梭,解锁不同入口。</p>
-          <div class="controls">
-            <button class="audio-button" id="audioToggle">
-              <span data-i18n="audioToggle">播放节奏</span>
-            </button>
-            <span class="hint" data-i18n="audioHint">使用 Bad Apple 驱动视觉</span>
-          </div>
-        </section>
-
-        <section class="stage" data-stage="1">
-          <h2 data-i18n="portfolioTitle">自我介绍与作品集</h2>
-          <p data-i18n="portfolioBody">混音、拟音、Atmos 项目与现场采录,进入我的作品宇宙。</p>
-          <a href="portfolio.html" data-i18n="portfolioCTA">进入作品集</a>
-        </section>
-
-        <section class="stage" data-stage="2">
-          <h2 data-i18n="newyearTitle">2026 新年祝贺</h2>
-          <p data-i18n="newyearBody">一段带有光场与祝词的声音祝福,开启新年的频率。</p>
-          <a href="newyear2026.html" data-i18n="newyearCTA">开启祝贺</a>
-        </section>
-
-        <div class="visualizer-wrap">
-          <canvas id="visualizer"></canvas>
-        </div>
-
-        <section class="lyrics" id="lyrics">
-          <h3 data-i18n="lyricsTitle">Lyrics / 光影</h3>
-          <div class="lyrics-lines">
-            <p class="label">[Verse 1]</p>
-            <p>流れてく 時の中ででも</p>
-            <p>気だるさが ほらグルグル廻って</p>
-            <p>私から 離れる心も 見えないわ</p>
-            <p>そう知らない?</p>
-            <p>自分から 動くこともなく</p>
-            <p>時の隙間に 流され続けて</p>
-            <p>知らないわ 周りのことなど</p>
-            <p>私は私 それだけ</p>
-            <p class="label">[Pre-Chorus 1]</p>
-            <p>夢見てる?</p>
-            <p>何も見てない?</p>
-            <p>語るも無駄な 自分の言葉?</p>
-            <p>悲しむなんて 疲れるだけよ</p>
-            <p>何も感じず 過ごせばいいの</p>
-            <p class="label">[Chorus 1]</p>
-            <p>戸惑う言葉 与えられても</p>
-            <p>自分の心 ただ上の空</p>
-            <p>もし私から 動くのならば</p>
-            <p>すべて変えるのなら 黒にする</p>
-            <p class="label">[Verse 2]</p>
-            <p>こんな自分に 未来はあるの?</p>
-            <p>こんな世界に 私はいるの?</p>
-            <p>今切ないの? 今悲しいの?</p>
-            <p>自分の事も わからないまま</p>
-            <p>歩むことさえ 疲れるだけよ</p>
-            <p>人のことなど 知りもしないわ</p>
-            <p>こんな私も 変われるのなら</p>
-            <p>もし変われるのなら 白になる?</p>
-            <p class="label">[Interlude]</p>
-            <p class="label">[Verse 3]</p>
-            <p>流れてく 時の中ででも</p>
-            <p>気だるさがほら グルグル廻って</p>
-            <p>私から 離れる心も 見えないわ</p>
-            <p>そう知らない?</p>
-            <p>自分から 動くこともなく</p>
-            <p>時の隙間に 流され続けて</p>
-            <p>知らないわ 周りのことなど</p>
-            <p>私は私 それだけ</p>
-            <p class="label">[Pre-Chorus 2]</p>
-            <p>夢見てる?</p>
-            <p>何も見てない?</p>
-            <p>語るも無駄な 自分の言葉?</p>
-            <p>悲しむなんて 疲れるだけよ</p>
-            <p>何も感じず 過ごせばいいの</p>
-            <p class="label">[Chorus 2]</p>
-            <p>戸惑う言葉 与えられても</p>
-            <p>自分の心 ただ上の空</p>
-            <p>もし私から 動くのならば</p>
-            <p>すべて変えるのなら 黒にする</p>
-            <p class="label">[Verse 4]</p>
-            <p>無駄な時間に 未来はあるの?</p>
-            <p>こんな所に 私はいるの?</p>
-            <p>私のことを 言えたいならば</p>
-            <p>言葉にするのなら「ろくでなし」</p>
-            <p>こんな所に 私はいるの?</p>
-            <p>こんな時間に 私はいるの?</p>
-            <p>こんな私も 変われるのなら</p>
-            <p>もし変われるのなら 白になる?</p>
-            <p class="label">[Bridge]</p>
-            <p>今夢見てる? なにも見てない?</p>
-            <p>語るも無駄な 自分の言葉?</p>
-            <p>悲しむなんて 疲れるだけよ</p>
-            <p>何も感じず 過ごせばいいの</p>
-            <p class="label">[Chorus 3]</p>
-            <p>戸惑う言葉 与えられても</p>
-            <p>自分の心 ただ上の空</p>
-            <p>もし私から 動くのならば</p>
-            <p>すべて変えるのなら 黒にする</p>
-            <p class="label">[Outro]</p>
-            <p>動くのならば</p>
-            <p>動くのならば</p>
-            <p>すべて壊すわ</p>
-            <p>すべて壊すわ</p>
-            <p>悲しむならば</p>
-            <p>悲しむならば</p>
-            <p>私の心 白く変われる?</p>
-            <p>貴方の事も</p>
-            <p>私のことも</p>
-            <p>すべての事も</p>
-            <p>まだ知らないの</p>
-            <p>重い目蓋を 開けたのならば</p>
-            <p>すべて壊すのなら</p>
-            <p>黒になれ!!!</p>
-          </div>
-        </section>
-      </main>
-
-      <div class="progress">
-        <span data-i18n="scrollHint">滚动</span>
-        <div class="progress-bar"><span id="progressFill"></span></div>
-        <span id="progressLabel">01 / 03</span>
+    <!-- 开屏动画 -->
+    <div class="splash-screen" id="splashScreen">
+      <div class="splash-content">
+        <div class="splash-icon">🎵</div>
+        <div class="splash-text" data-i18n="splashTitle">K Audio Lab</div>
+        <div class="splash-hint" data-i18n="splashHint">BGM 即将自动播放...</div>
       </div>
     </div>
 
-    <audio id="bgAudio" preload="metadata" crossorigin="anonymous">
+    <div class="background" id="background"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- 固定BGM控制器 -->
+    <div class="bgm-controller">
+      <button class="bgm-toggle" id="bgmToggle">
+        <span>▶</span>
+      </button>
+      <div class="bgm-info">
+        <div class="bgm-title" data-i18n="bgmTitle">Bad Apple</div>
+        <div class="bgm-status" data-i18n="bgmStatus">未播放</div>
+      </div>
+    </div>
+
+    <!-- 语言切换 -->
+    <div class="lang-switch">
+      <button data-lang="zh" class="active"><span>中文</span></button>
+      <button data-lang="ja"><span>日本語</span></button>
+      <button data-lang="en"><span>EN</span></button>
+    </div>
+
+    <!-- 底部可视化器 -->
+    <div class="visualizer-fixed" id="visualizer">
+      <canvas id="vizCanvas"></canvas>
+    </div>
+
+    <main>
+      <div class="hero-title">
+        <h1 data-i18n="heroTitle">声波入口</h1>
+        <p data-i18n="heroSubtitle">选择你的旅程</p>
+      </div>
+
+      <div class="portals-container">
+        <article class="portal-card" id="portal1">
+          <div class="portal-icon">🎚️</div>
+          <h2 data-i18n="portfolioTitle">作品集</h2>
+          <p data-i18n="portfolioBody">混音、拟音、Atmos 项目与现场采录，进入我的作品宇宙。</p>
+          <a href="portfolio.html" class="portal-link" data-i18n="portfolioCTA">进入作品集</a>
+        </article>
+
+        <article class="portal-card" id="portal2">
+          <div class="portal-icon">🎆</div>
+          <h2 data-i18n="newyearTitle">2026 新年祝贺</h2>
+          <p data-i18n="newyearBody">一段带有光场与祝词的声音祝福，开启新年的频率。</p>
+          <a href="newyear2026.html" class="portal-link" data-i18n="newyearCTA">开启祝贺</a>
+        </article>
+      </div>
+
+      <section class="lyrics-section" id="lyrics">
+        <h3 data-i18n="lyricsTitle">Lyrics / 光影</h3>
+        <div class="lyrics-lines">
+          <p class="label">[Verse 1]</p>
+          <p>流れてく 時の中ででも</p>
+          <p>気だるさが ほらグルグル廻って</p>
+          <p>私から 離れる心も 見えないわ</p>
+          <p>そう知らない?</p>
+          <p>自分から 動くこともなく</p>
+          <p>時の隙間に 流され続けて</p>
+          <p>知らないわ 周りのことなど</p>
+          <p>私は私 それだけ</p>
+          <p class="label">[Pre-Chorus 1]</p>
+          <p>夢見てる?</p>
+          <p>何も見てない?</p>
+          <p>語るも無駄な 自分の言葉?</p>
+          <p>悲しむなんて 疲れるだけよ</p>
+          <p>何も感じず 過ごせばいいの</p>
+          <p class="label">[Chorus 1]</p>
+          <p>戸惑う言葉 与えられても</p>
+          <p>自分の心 ただ上の空</p>
+          <p>もし私から 動くのならば</p>
+          <p>すべて変えるのなら 黒にする</p>
+          <p class="label">[Verse 2]</p>
+          <p>こんな自分に 未来はあるの?</p>
+          <p>こんな世界に 私はいるの?</p>
+          <p>今切ないの? 今悲しいの?</p>
+          <p>自分の事も わからないまま</p>
+          <p>歩むことさえ 疲れるだけよ</p>
+          <p>人のことなど 知りもしないわ</p>
+          <p>こんな私も 変われるのなら</p>
+          <p>もし変われるのなら 白になる?</p>
+          <p class="label">[Interlude]</p>
+          <p class="label">[Verse 3]</p>
+          <p>流れてく 時の中ででも</p>
+          <p>気だるさがほら グルグル廻って</p>
+          <p>私から 離れる心も 見えないわ</p>
+          <p>そう知らない?</p>
+          <p>自分から 動くこともなく</p>
+          <p>時の隙間に 流され続けて</p>
+          <p>知らないわ 周りのことなど</p>
+          <p>私は私 それだけ</p>
+          <p class="label">[Pre-Chorus 2]</p>
+          <p>夢見てる?</p>
+          <p>何も見てない?</p>
+          <p>語るも無駄な 自分の言葉?</p>
+          <p>悲しむなんて 疲れるだけよ</p>
+          <p>何も感じず 過ごせばいいの</p>
+          <p class="label">[Chorus 2]</p>
+          <p>戸惑う言葉 与えられても</p>
+          <p>自分の心 ただ上の空</p>
+          <p>もし私から 動くのならば</p>
+          <p>すべて変えるのなら 黒にする</p>
+          <p class="label">[Verse 4]</p>
+          <p>無駄な時間に 未来はあるの?</p>
+          <p>こんな所に 私はいるの?</p>
+          <p>私のことを 言えたいならば</p>
+          <p>言葉にするのなら「ろくでなし」</p>
+          <p>こんな所に 私はいるの?</p>
+          <p>こんな時間に 私はいるの?</p>
+          <p>こんな私も 変われるのなら</p>
+          <p>もし変われるのなら 白になる?</p>
+          <p class="label">[Bridge]</p>
+          <p>今夢見てる? なにも見てない?</p>
+          <p>語るも無駄な 自分の言葉?</p>
+          <p>悲しむなんて 疲れるだけよ</p>
+          <p>何も感じず 過ごせばいいの</p>
+          <p class="label">[Chorus 3]</p>
+          <p>戸惑う言葉 与えられても</p>
+          <p>自分の心 ただ上の空</p>
+          <p>もし私から 動くのならば</p>
+          <p>すべて変えるのなら 黒にする</p>
+          <p class="label">[Outro]</p>
+          <p>動くのならば</p>
+          <p>動くのならば</p>
+          <p>すべて壊すわ</p>
+          <p>すべて壊すわ</p>
+          <p>悲しむならば</p>
+          <p>悲しむならば</p>
+          <p>私の心 白く変われる?</p>
+          <p>貴方の事も</p>
+          <p>私のことも</p>
+          <p>すべての事も</p>
+          <p>まだ知らないの</p>
+          <p>重い目蓋を 開けたのならば</p>
+          <p>すべて壊すのなら</p>
+          <p>黒になれ!!!</p>
+        </div>
+      </section>
+    </main>
+
+    <audio id="bgAudio" preload="auto" crossorigin="anonymous">
       <source src="https://raw.githubusercontent.com/Final-Ke/final-ke.github.io/main/Bad%20Apple%202%20Live.mp3" type="audio/mpeg" />
     </audio>
 
     <script>
-      // 创建粒子背景
+      // 创建粒子
       function createParticles() {
         const background = document.getElementById('background');
         const particleCount = 30;
-
         for (let i = 0; i < particleCount; i++) {
           const particle = document.createElement('div');
           particle.className = 'particle';
@@ -668,83 +804,75 @@
           background.appendChild(particle);
         }
       }
-
       createParticles();
 
       const translations = {
         zh: {
           pageTitle: "K宇宙入口",
-          brandName: "K音频实验室",
-          brandRole: "沉浸式音频工程师",
-          heroTitle: "Bad Apple 风格声波入口",
-          heroSubtitle: "滚动鼠标,像在黑白胶片中穿梭,解锁不同入口。",
-          audioToggle: "播放节奏",
-          audioHint: "使用 Bad Apple 驱动视觉",
-          audioError: "播放失败,请刷新后重试",
-          portfolioTitle: "自我介绍与作品集",
-          portfolioBody: "混音、拟音、Atmos 项目与现场采录,进入我的作品宇宙。",
+          splashTitle: "K Audio Lab",
+          splashHint: "BGM 即将自动播放...",
+          bgmTitle: "Bad Apple",
+          bgmStatus: "未播放",
+          bgmPlaying: "播放中",
+          heroTitle: "声波入口",
+          heroSubtitle: "选择你的旅程",
+          portfolioTitle: "作品集",
+          portfolioBody: "混音、拟音、Atmos 项目与现场采录，进入我的作品宇宙。",
           portfolioCTA: "进入作品集",
           newyearTitle: "2026 新年祝贺",
-          newyearBody: "一段带有光场与祝词的声音祝福,开启新年的频率。",
+          newyearBody: "一段带有光场与祝词的声音祝福，开启新年的频率。",
           newyearCTA: "开启祝贺",
-          scrollHint: "滚动",
           lyricsTitle: "Lyrics / 光影"
         },
         ja: {
           pageTitle: "Kユニバース・ゲート",
-          brandName: "K Audio Lab",
-          brandRole: "イマーシブ・オーディオエンジニア",
-          heroTitle: "Bad Apple風サウンドゲート",
-          heroSubtitle: "スクロールで白黒フィルムを進み,入口を解放します。",
-          audioToggle: "リズムを再生",
-          audioHint: "Bad Appleでビジュアルを駆動",
-          audioError: "再生に失敗しました",
-          portfolioTitle: "プロフィール & ポートフォリオ",
+          splashTitle: "K Audio Lab",
+          splashHint: "BGMが自動再生されます...",
+          bgmTitle: "Bad Apple",
+          bgmStatus: "停止中",
+          bgmPlaying: "再生中",
+          heroTitle: "サウンドゲート",
+          heroSubtitle: "旅を選んでください",
+          portfolioTitle: "ポートフォリオ",
           portfolioBody: "ミックス、フォーリー、Atmos案件、ライブ収録の世界へ。",
           portfolioCTA: "ポートフォリオを見る",
           newyearTitle: "2026 新年のご挨拶",
           newyearBody: "光の祝福とメッセージで新年の周波数を開く。",
           newyearCTA: "メッセージを開く",
-          scrollHint: "スクロール",
           lyricsTitle: "Lyrics / 光と影"
         },
         en: {
           pageTitle: "K Universe Gateway",
-          brandName: "K Audio Lab",
-          brandRole: "Immersive Audio Engineer",
-          heroTitle: "Bad Apple-Inspired Sonic Gate",
-          heroSubtitle: "Scroll like a monochrome reel to reveal each entrance.",
-          audioToggle: "Play rhythm",
-          audioHint: "Driven by Bad Apple",
-          audioError: "Playback failed",
-          portfolioTitle: "Portfolio & Bio",
+          splashTitle: "K Audio Lab",
+          splashHint: "BGM will auto-play...",
+          bgmTitle: "Bad Apple",
+          bgmStatus: "Stopped",
+          bgmPlaying: "Playing",
+          heroTitle: "Sonic Gateway",
+          heroSubtitle: "Choose Your Journey",
+          portfolioTitle: "Portfolio",
           portfolioBody: "Mixing, Foley, Atmos sessions, and live capture — step inside.",
           portfolioCTA: "Enter portfolio",
-          newyearTitle: "2026 New Year Greeting",
+          newyearTitle: "2026 New Year",
           newyearBody: "A luminous sonic blessing to open the new-year frequency.",
           newyearCTA: "Open greeting",
-          scrollHint: "Scroll",
           lyricsTitle: "Lyrics / Monochrome"
         }
       };
 
       const langButtons = document.querySelectorAll("[data-lang]");
       const translatableElements = document.querySelectorAll("[data-i18n]");
-      const stages = Array.from(document.querySelectorAll(".stage"));
-      const progressFill = document.getElementById("progressFill");
-      const progressLabel = document.getElementById("progressLabel");
-      const audioToggle = document.getElementById("audioToggle");
+      const bgmToggle = document.getElementById("bgmToggle");
       const audio = document.getElementById("bgAudio");
-      const canvas = document.getElementById("visualizer");
+      const canvas = document.getElementById("vizCanvas");
+      const visualizer = document.getElementById("visualizer");
+      const splashScreen = document.getElementById("splashScreen");
+      const lyricsSection = document.getElementById("lyrics");
       const ctx = canvas.getContext("2d");
 
       let currentLang = localStorage.getItem("landingLang") || "zh";
-      let progress = 0;
-      let targetProgress = 0;
-      let analyser;
-      let audioCtx;
-      let dataArray;
       let isPlaying = false;
+      let analyser, audioCtx, dataArray;
 
       function setLanguage(lang) {
         const pack = translations[lang];
@@ -760,11 +888,11 @@
         localStorage.setItem("landingLang", lang);
       }
 
+      // 可视化器
       function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = 150 * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
@@ -779,35 +907,17 @@
         analyser.connect(audioCtx.destination);
       }
 
-      function toggleAudio() {
-        initAudio();
-        if (audioCtx.state === "suspended") audioCtx.resume();
-        if (isPlaying) {
-          audio.pause();
-          isPlaying = false;
-          audioToggle.querySelector('span').textContent = translations[currentLang].audioToggle;
-        } else {
-          const playPromise = audio.play();
-          if (playPromise && typeof playPromise.catch === "function") {
-            playPromise.catch(() => {
-              isPlaying = false;
-              audioToggle.querySelector('span').textContent = translations[currentLang].audioError;
-            });
-          }
-          isPlaying = true;
-          audioToggle.querySelector('span').textContent = translations[currentLang].audioToggle + " ✓";
-        }
-      }
-
       function draw(timestamp) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const width = canvas.width / (window.devicePixelRatio || 1);
-        const height = canvas.height / (window.devicePixelRatio || 1);
+        const width = window.innerWidth;
+        const height = 150;
+
+        ctx.clearRect(0, 0, width, height);
 
         // 背景渐变
         const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
-        bgGradient.addColorStop(0, 'rgba(0, 20, 30, 0.9)');
-        bgGradient.addColorStop(1, 'rgba(10, 10, 15, 0.9)');
+        bgGradient.addColorStop(0, 'rgba(10, 10, 15, 0)');
+        bgGradient.addColorStop(0.5, 'rgba(10, 10, 15, 0.5)');
+        bgGradient.addColorStop(1, 'rgba(10, 10, 15, 0.95)');
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, width, height);
 
@@ -819,11 +929,8 @@
         }
 
         // 绘制音频条
-        const columns = 64;
+        const columns = Math.min(128, Math.floor(width / 10));
         const barWidth = width / columns;
-        const offset = (Math.sin(timestamp / 1400) + 1) * 0.5;
-
-        // 创建渐变色
         const gradient = ctx.createLinearGradient(0, height, 0, 0);
         gradient.addColorStop(0, '#00ffff');
         gradient.addColorStop(0.5, '#00aaff');
@@ -832,61 +939,45 @@
         ctx.fillStyle = gradient;
 
         for (let i = 0; i < columns; i += 1) {
-          const value = dataArray ? dataArray[i] / 255 : 0.2 + 0.15 * Math.sin(timestamp / 600 + i * 0.4);
-          const heightScale = 0.5 + energy * 0.6;
+          const value = dataArray && i < dataArray.length ? dataArray[i] / 255 : 0.2 + 0.15 * Math.sin(timestamp / 600 + i * 0.4);
+          const heightScale = 0.6 + energy * 0.4;
           const barHeight = value * height * heightScale;
           const x = i * barWidth;
-          const y = height - barHeight - height * 0.15 * offset;
+          const y = height - barHeight;
 
-          // 主条形
           ctx.fillRect(x, y, barWidth * 0.7, barHeight);
-
-          // 发光效果
           ctx.shadowBlur = 15;
           ctx.shadowColor = '#00ffff';
           ctx.fillRect(x, y, barWidth * 0.7, barHeight);
           ctx.shadowBlur = 0;
         }
 
-        // 扫描线效果
-        ctx.fillStyle = "rgba(0, 255, 255, 0.05)";
-        for (let y = 0; y < height; y += 4) {
-          ctx.fillRect(0, y, width, 1);
-        }
-
-        // 波浪线
-        ctx.strokeStyle = `rgba(0, 255, 255, ${0.3 + energy * 0.4})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        for (let x = 0; x < width; x += 5) {
-          const y = height * 0.5 + Math.sin(x / 30 + timestamp / 500) * 20 * (1 + energy);
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-
         requestAnimationFrame(draw);
       }
 
-      function setStage(progressValue) {
-        const index = Math.round(progressValue * 2);
-        stages.forEach((stage, idx) => stage.classList.toggle("active", idx === index));
-        progressFill.style.width = `${progressValue * 100}%`;
-        progressLabel.textContent = `0${index + 1} / 03`;
+      function toggleBGM() {
+        initAudio();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+
+        if (isPlaying) {
+          audio.pause();
+          isPlaying = false;
+          bgmToggle.querySelector('span').textContent = '▶';
+          bgmToggle.classList.remove('playing');
+          visualizer.classList.remove('active');
+          document.querySelector('.bgm-status').textContent = translations[currentLang].bgmStatus;
+        } else {
+          audio.play().catch(err => console.log('Play failed:', err));
+          isPlaying = true;
+          bgmToggle.querySelector('span').textContent = '⏸';
+          bgmToggle.classList.add('playing');
+          visualizer.classList.add('active');
+          lyricsSection.classList.add('visible');
+          document.querySelector('.bgm-status').textContent = translations[currentLang].bgmPlaying;
+        }
       }
 
-      function onWheel(event) {
-        event.preventDefault();
-        targetProgress += Math.sign(event.deltaY) * 0.02;
-        targetProgress = Math.min(Math.max(targetProgress, 0), 1);
-      }
-
-      function animateProgress() {
-        progress += (targetProgress - progress) * 0.06;
-        setStage(progress);
-        requestAnimationFrame(animateProgress);
-      }
-
+      // 歌词同步
       const lyricLines = Array.from(document.querySelectorAll(".lyrics-lines p"));
       lyricLines.forEach((line, index) => {
         line.dataset.index = index;
@@ -902,22 +993,36 @@
         });
       }
 
-      audio.addEventListener("play", () => {
-        document.body.classList.add("lyrics-visible");
-        updateLyrics();
-      });
-
       audio.addEventListener("timeupdate", updateLyrics);
       audio.addEventListener("seeked", updateLyrics);
 
-      window.addEventListener("wheel", onWheel, { passive: false });
+      // 卡片鼠标跟随效果
+      document.querySelectorAll('.portal-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          card.style.setProperty('--mouse-x', x + '%');
+          card.style.setProperty('--mouse-y', y + '%');
+        });
+      });
+
+      // 开屏动画
+      setTimeout(() => {
+        splashScreen.classList.add('fade-out');
+        setTimeout(() => {
+          splashScreen.remove();
+          // 自动播放BGM
+          toggleBGM();
+        }, 800);
+      }, 2500);
+
+      bgmToggle.addEventListener("click", toggleBGM);
       window.addEventListener("resize", resizeCanvas);
-      audioToggle.addEventListener("click", toggleAudio);
       langButtons.forEach((btn) => btn.addEventListener("click", () => setLanguage(btn.dataset.lang)));
 
       resizeCanvas();
       draw(0);
-      animateProgress();
       setLanguage(currentLang);
     </script>
   </body>
