@@ -165,11 +165,12 @@
       /* 加载进度 */
       .loading-progress {
         position: absolute;
-        bottom: 80px;
+        bottom: 140px;
         left: 50%;
         transform: translateX(-50%);
-        width: 300px;
-        max-width: 80%;
+        width: 340px;
+        max-width: 85%;
+        z-index: 10;
       }
 
       .progress-bar-container {
@@ -869,9 +870,8 @@
 
     <!-- 视频背景 -->
     <div class="video-background">
-      <video id="bgVideo" autoplay muted loop playsinline preload="auto" crossorigin="anonymous">
-        <source src="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Bad%20apple.mp4" type="video/mp4" />
-        您的浏览器不支持视频标签。
+      <video id="bgVideo" muted loop playsinline preload="metadata">
+        <!-- 视频源将由 JavaScript 动态设置 -->
       </video>
       <canvas id="halftoneCanvas"></canvas>
       <canvas id="tempCanvas" style="display: none;"></canvas>
@@ -1021,8 +1021,8 @@
       </section>
     </main>
 
-    <audio id="bgAudio" preload="auto" crossorigin="anonymous">
-      <source src="https://raw.githubusercontent.com/Final-Ke/final-ke.github.io/main/Bad%20Apple%202%20Live.mp3" type="audio/mpeg" />
+    <audio id="bgAudio" preload="metadata">
+      <!-- 音频源将由 JavaScript 动态设置 -->
     </audio>
 
     <script>
@@ -1402,9 +1402,20 @@
         console.log(`📦 开始预加载 ${type}:`, url);
 
         try {
+          // 尝试不使用CORS（因为是同域）
           const response = await fetch(url, {
-            mode: 'cors',
-            credentials: 'omit'
+            cache: 'default'
+          });
+
+          console.log(`📡 ${type} 响应状态:`, {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            headers: {
+              contentType: response.headers.get('content-type'),
+              contentLength: response.headers.get('content-length'),
+              cors: response.headers.get('access-control-allow-origin')
+            }
           });
 
           if (!response.ok) {
@@ -1414,6 +1425,18 @@
           const contentLength = response.headers.get('content-length');
           const total = parseInt(contentLength, 10);
           let loaded = 0;
+
+          // 检查是否支持流式读取
+          if (!response.body) {
+            console.warn(`⚠️ ${type} 不支持流式读取，使用blob下载`);
+            const blob = await response.blob();
+            console.log(`✓ ${type} blob下载完成:`, (blob.size / 1024 / 1024).toFixed(2) + 'MB');
+
+            const overallPercent = type === 'video' ? 70 : 100;
+            updateProgress(overallPercent, `加载中... ${overallPercent}%`, `${type === 'video' ? '视频' : '音频'}已下载`);
+
+            return URL.createObjectURL(blob);
+          }
 
           const reader = response.body.getReader();
           const chunks = [];
@@ -1442,6 +1465,15 @@
                 `加载中... ${Math.round(overallPercent)}%`,
                 `${type === 'video' ? '视频' : '音频'}: ${sizeLoaded}MB / ${sizeTotal}MB`
               );
+            } else {
+              // 没有content-length，显示已下载大小
+              const sizeLoaded = (loaded / 1024 / 1024).toFixed(1);
+              const basePercent = type === 'video' ? 35 : 85;
+              updateProgress(
+                basePercent,
+                `加载中... ${basePercent}%`,
+                `${type === 'video' ? '视频' : '音频'}: ${sizeLoaded}MB`
+              );
             }
           }
 
@@ -1455,63 +1487,140 @@
           return URL.createObjectURL(blob);
 
         } catch (err) {
-          console.error(`❌ ${type} 预加载失败:`, err);
+          console.error(`❌ ${type} 预加载失败:`, {
+            name: err.name,
+            message: err.message,
+            stack: err.stack
+          });
           throw err;
         }
       }
 
-      // 完整的资源预加载流程
+      // 检测视频编码支持
+      function checkVideoCodecSupport() {
+        const video = document.createElement('video');
+        const codecs = {
+          h264: 'video/mp4; codecs="avc1.42E01E"',
+          h265: 'video/mp4; codecs="hev1.1.6.L93.B0"',
+          vp9: 'video/webm; codecs="vp9"'
+        };
+
+        const support = {};
+        for (const [name, codec] of Object.entries(codecs)) {
+          support[name] = video.canPlayType(codec) !== '';
+        }
+
+        console.log('📹 视频编码支持:', support);
+        return support;
+      }
+
+      // 完整的资源预加载流程（使用相对路径）
       async function preloadAllResources() {
         try {
+          // 检测视频编码支持
+          checkVideoCodecSupport();
+
           updateProgress(0, '加载中... 0%', '开始下载视频...');
 
-          // 1. 预加载视频
-          const videoUrl = 'https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Bad%20apple.mp4';
-          cachedVideoBlob = await preloadResource(videoUrl, 'video');
+          // 使用相对路径（GitHub Pages）
+          const videoUrl = './Bad%20apple.mp4';
+          const audioUrl = './Bad%20Apple%202%20Live.mp3';
 
-          updateProgress(70, '加载中... 70%', '视频加载完成，开始下载音频...');
+          console.log('📦 视频URL:', videoUrl);
+          console.log('📦 音频URL:', audioUrl);
+
+          // 1. 预加载视频
+          try {
+            cachedVideoBlob = await preloadResource(videoUrl, 'video');
+            updateProgress(70, '加载中... 70%', '视频加载完成，开始下载音频...');
+          } catch (videoErr) {
+            console.error('❌ 视频预加载失败，尝试直接设置源:', videoErr);
+            // 如果预加载失败，直接设置URL
+            bgVideo.src = videoUrl;
+            updateProgress(35, '加载中... 35%', '视频将在播放时加载...');
+          }
 
           // 2. 预加载音频
-          const audioUrl = 'https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Bad%20Apple%202%20Live.mp3';
-          cachedAudioBlob = await preloadResource(audioUrl, 'audio');
-
-          updateProgress(100, '加载完成！', '所有资源已就绪');
-
-          console.log('✅ 所有资源预加载完成');
-
-          // 3. 应用缓存的资源
-          if (bgVideo && cachedVideoBlob) {
-            bgVideo.src = cachedVideoBlob;
-            console.log('✓ 视频源已更新为缓存版本');
+          try {
+            cachedAudioBlob = await preloadResource(audioUrl, 'audio');
+            updateProgress(100, '加载完成！', '所有资源已就绪');
+          } catch (audioErr) {
+            console.error('❌ 音频预加载失败，尝试直接设置源:', audioErr);
+            // 如果预加载失败，直接设置URL
+            audio.src = audioUrl;
+            updateProgress(100, '加载完成！', '音频将在播放时加载...');
           }
 
-          if (audio && cachedAudioBlob) {
-            audio.src = cachedAudioBlob;
-            console.log('✓ 音频源已更新为缓存版本');
+          console.log('✅ 资源准备完成');
+
+          // 3. 应用缓存的资源（如果成功下载）
+          if (bgVideo) {
+            if (cachedVideoBlob) {
+              bgVideo.src = cachedVideoBlob;
+              console.log('✓ 视频源已更新为缓存版本');
+            } else if (!bgVideo.src) {
+              bgVideo.src = videoUrl;
+              console.log('✓ 视频源设置为直接链接');
+            }
           }
 
-          // 4. 等待资源加载到元素
-          await Promise.all([
-            new Promise(resolve => {
-              if (bgVideo.readyState >= 3) {
-                resolve();
-              } else {
-                bgVideo.addEventListener('canplaythrough', resolve, { once: true });
-              }
-            }),
-            new Promise(resolve => {
-              if (audio.readyState >= 3) {
-                resolve();
-              } else {
-                audio.addEventListener('canplaythrough', resolve, { once: true });
-              }
-            })
-          ]);
+          if (audio) {
+            if (cachedAudioBlob) {
+              audio.src = cachedAudioBlob;
+              console.log('✓ 音频源已更新为缓存版本');
+            } else if (!audio.src) {
+              audio.src = audioUrl;
+              console.log('✓ 音频源设置为直接链接');
+            }
+          }
+
+          // 4. 等待资源加载到元素（最多等待5秒）
+          try {
+            await Promise.race([
+              Promise.all([
+                new Promise(resolve => {
+                  if (bgVideo.readyState >= 2) {
+                    resolve();
+                  } else {
+                    const onReady = () => resolve();
+                    bgVideo.addEventListener('loadeddata', onReady, { once: true });
+                    bgVideo.addEventListener('canplay', onReady, { once: true });
+                    setTimeout(resolve, 3000); // 3秒超时
+                  }
+                }),
+                new Promise(resolve => {
+                  if (audio.readyState >= 2) {
+                    resolve();
+                  } else {
+                    const onReady = () => resolve();
+                    audio.addEventListener('loadeddata', onReady, { once: true });
+                    audio.addEventListener('canplay', onReady, { once: true });
+                    setTimeout(resolve, 3000); // 3秒超时
+                  }
+                })
+              ]),
+              new Promise(resolve => setTimeout(resolve, 5000)) // 总超时5秒
+            ]);
+          } catch (waitErr) {
+            console.warn('⚠️ 等待资源就绪超时:', waitErr);
+          }
 
           videoLoaded = true;
           audioLoaded = true;
 
           console.log('✅ 资源已应用到播放器');
+          console.log('📹 视频状态:', {
+            src: bgVideo.src ? '已设置' : '未设置',
+            readyState: bgVideo.readyState,
+            networkState: bgVideo.networkState,
+            error: bgVideo.error
+          });
+          console.log('🎵 音频状态:', {
+            src: audio.src ? '已设置' : '未设置',
+            readyState: audio.readyState,
+            networkState: audio.networkState,
+            error: audio.error
+          });
 
           // 显示开始按钮
           checkResourcesLoaded();
@@ -1522,9 +1631,22 @@
           console.error('❌ 资源预加载失败:', err);
           updateProgress(0, '加载失败', err.message);
 
-          // 失败后允许继续，使用直接链接
+          // 失败后也设置直接链接并允许继续
+          if (bgVideo && !bgVideo.src) {
+            bgVideo.src = './Bad%20apple.mp4';
+          }
+          if (audio && !audio.src) {
+            audio.src = './Bad%20Apple%202%20Live.mp3';
+          }
+
           setTimeout(() => {
-            updateSplashHint('资源加载失败，点击尝试继续');
+            const errorTexts = {
+              zh: '资源加载遇到问题，点击尝试播放',
+              ja: 'リソース読み込みエラー、クリックして再生を試す',
+              en: 'Resource loading issue, click to try playing'
+            };
+            updateSplashHint(errorTexts[currentLang] || errorTexts.zh);
+
             if (startBtn) {
               startBtn.style.opacity = '1';
               startBtn.style.pointerEvents = 'auto';
@@ -1830,6 +1952,41 @@
       }
 
 
+      // 简单加载模式（直接设置源，不预下载）
+      async function simpleLoadMode() {
+        console.log('🔄 使用简单加载模式');
+
+        updateProgress(0, '准备资源...', '直接加载模式');
+
+        // 直接设置源
+        const videoUrl = './Bad%20apple.mp4';
+        const audioUrl = './Bad%20Apple%202%20Live.mp3';
+
+        if (bgVideo && !bgVideo.src) {
+          bgVideo.src = videoUrl;
+          bgVideo.load();
+          console.log('✓ 视频源已设置:', videoUrl);
+        }
+
+        if (audio && !audio.src) {
+          audio.src = audioUrl;
+          audio.load();
+          console.log('✓ 音频源已设置:', audioUrl);
+        }
+
+        updateProgress(50, '加载中... 50%', '等待资源准备...');
+
+        // 等待一下让浏览器开始加载
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        updateProgress(100, '准备完成', '资源将在播放时加载');
+
+        videoLoaded = true;
+        audioLoaded = true;
+
+        checkResourcesLoaded();
+      }
+
       // 初始化
       async function init() {
         // 获取元素
@@ -1871,10 +2028,28 @@
 
         console.log('✅ 初始化完成');
 
-        // 开始预加载资源
-        console.log('🎬 开始预加载资源');
-        setTimeout(() => {
-          preloadAllResources();
+        // 检测是否在本地开发环境
+        const isLocal = window.location.hostname === 'localhost' ||
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.protocol === 'file:';
+
+        console.log('🌐 环境检测:', {
+          hostname: window.location.hostname,
+          protocol: window.location.protocol,
+          isLocal: isLocal
+        });
+
+        // 开始加载资源
+        console.log('🎬 开始加载资源');
+        setTimeout(async () => {
+          try {
+            // 尝试预加载模式
+            await preloadAllResources();
+          } catch (err) {
+            console.warn('⚠️ 预加载失败，使用简单加载模式:', err);
+            // 如果预加载失败，使用简单模式
+            await simpleLoadMode();
+          }
         }, 500); // 延迟500ms让页面先渲染
       }
 
