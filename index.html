@@ -118,9 +118,29 @@
         inset: 0;
         z-index: 0;
         overflow: hidden;
-        background: radial-gradient(ellipse at 50% 0%, rgba(0, 255, 255, 0.08), transparent 60%),
-                    radial-gradient(ellipse at 80% 50%, rgba(255, 0, 255, 0.05), transparent 50%),
-                    var(--bg);
+        background: var(--bg);
+      }
+
+      /* 视频背景 */
+      .video-background {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .video-background video {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        transform: translate(-50%, -50%);
+        object-fit: cover;
+        opacity: 0.15;
+        filter: contrast(1.2) brightness(0.9);
       }
 
       .particle {
@@ -716,6 +736,13 @@
       </div>
     </div>
 
+    <!-- 视频背景 -->
+    <div class="video-background">
+      <video id="bgVideo" autoplay muted loop playsinline>
+        <source src="Bad apple.mp4" type="video/mp4" />
+      </video>
+    </div>
+
     <div class="background" id="background"></div>
     <div class="grid-overlay"></div>
 
@@ -942,6 +969,7 @@
       const translatableElements = document.querySelectorAll("[data-i18n]");
       const bgmToggle = document.getElementById("bgmToggle");
       const audio = document.getElementById("bgAudio");
+      const bgVideo = document.getElementById("bgVideo");
       const canvas = document.getElementById("vizCanvas");
       const visualizer = document.getElementById("visualizer");
       const splashScreen = document.getElementById("splashScreen");
@@ -951,6 +979,7 @@
       let currentLang = localStorage.getItem("landingLang") || "zh";
       let isPlaying = false;
       let analyser, audioCtx, dataArray;
+      let autoplayAttempted = false;
 
       function setLanguage(lang) {
         const pack = translations[lang];
@@ -1033,9 +1062,11 @@
         requestAnimationFrame(draw);
       }
 
-      function toggleBGM() {
+      async function toggleBGM() {
         initAudio();
-        if (audioCtx.state === "suspended") audioCtx.resume();
+        if (audioCtx.state === "suspended") {
+          await audioCtx.resume();
+        }
 
         if (isPlaying) {
           audio.pause();
@@ -1045,13 +1076,42 @@
           visualizer.classList.remove('active');
           document.querySelector('.bgm-status').textContent = translations[currentLang].bgmStatus;
         } else {
-          audio.play().catch(err => console.log('Play failed:', err));
-          isPlaying = true;
-          bgmToggle.querySelector('span').textContent = '⏸';
-          bgmToggle.classList.add('playing');
-          visualizer.classList.add('active');
-          lyricsSection.classList.add('visible');
-          document.querySelector('.bgm-status').textContent = translations[currentLang].bgmPlaying;
+          try {
+            await audio.play();
+            isPlaying = true;
+            bgmToggle.querySelector('span').textContent = '⏸';
+            bgmToggle.classList.add('playing');
+            visualizer.classList.add('active');
+            lyricsSection.classList.add('visible');
+            document.querySelector('.bgm-status').textContent = translations[currentLang].bgmPlaying;
+            autoplayAttempted = true;
+          } catch (err) {
+            console.log('BGM自动播放被浏览器阻止，请点击播放按钮:', err);
+            // 如果自动播放失败，确保按钮状态正确
+            isPlaying = false;
+            bgmToggle.querySelector('span').textContent = '▶';
+            bgmToggle.classList.remove('playing');
+            // 显示提示（可选）
+            if (!autoplayAttempted) {
+              bgmToggle.style.animation = 'pulse 1s ease-in-out 3';
+            }
+          }
+        }
+      }
+
+      // 确保视频背景自动播放
+      async function ensureVideoPlays() {
+        try {
+          await bgVideo.play();
+          console.log('视频背景已开始播放');
+        } catch (err) {
+          console.log('视频自动播放失败，尝试静音播放:', err);
+          bgVideo.muted = true;
+          try {
+            await bgVideo.play();
+          } catch (retryErr) {
+            console.error('视频播放完全失败:', retryErr);
+          }
         }
       }
 
@@ -1175,12 +1235,26 @@
       // 开屏动画
       setTimeout(() => {
         splashScreen.classList.add('fade-out');
-        setTimeout(() => {
+        setTimeout(async () => {
           splashScreen.remove();
-          // 自动播放BGM
-          toggleBGM();
+          // 确保视频背景播放
+          await ensureVideoPlays();
+          // 尝试自动播放BGM
+          await toggleBGM();
         }, 800);
       }, 2500);
+
+      // 页面加载时也尝试启动视频（备用）
+      window.addEventListener('load', () => {
+        ensureVideoPlays();
+      });
+
+      // 用户首次交互时确保音频上下文激活
+      document.addEventListener('click', () => {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }, { once: true });
 
       bgmToggle.addEventListener("click", toggleBGM);
       window.addEventListener("resize", resizeCanvas);
