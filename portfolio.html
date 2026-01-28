@@ -663,18 +663,86 @@
         z-index: 1;
       }
 
-      /* Custom audio player */
-      .audio-player {
-        position: relative;
+      /* External link cards */
+      .project-link-container {
         margin-top: 24px;
       }
 
-      audio {
-        width: 100%;
-        height: 56px;
+      .external-link {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px 24px;
+        background: rgba(0, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
         border-radius: 16px;
-        outline: none;
-        filter: brightness(1.2) saturate(1.5);
+        text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .external-link::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+
+      .external-link:hover {
+        transform: translateX(8px);
+        border-color: var(--accent);
+        box-shadow: 0 8px 32px var(--accent-glow);
+      }
+
+      .external-link:hover::before {
+        opacity: 0.1;
+      }
+
+      .link-icon {
+        font-size: 2rem;
+        filter: drop-shadow(0 0 10px var(--accent-glow));
+        position: relative;
+        z-index: 1;
+        transition: transform 0.4s;
+      }
+
+      .external-link:hover .link-icon {
+        transform: scale(1.2) rotate(5deg);
+      }
+
+      .link-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .link-label {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text);
+      }
+
+      .link-subtitle {
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .link-arrow {
+        font-size: 1.5rem;
+        color: var(--accent);
+        position: relative;
+        z-index: 1;
+        transition: transform 0.4s;
+      }
+
+      .external-link:hover .link-arrow {
+        transform: translateX(6px);
       }
 
       /* Contact Section */
@@ -910,32 +978,32 @@
         <div class="portfolio-grid">
           <article class="project-card">
             <div class="project-number">01</div>
-            <h3 data-i18n="project1Title">霓虹黑色预告</h3>
-            <p data-i18n="project1Desc">金属打击与低频气压交织的Atmos混音。</p>
-            <div class="audio-player">
-              <audio controls preload="none">
-                <source src="https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav" type="audio/wav" />
-              </audio>
+            <h3 data-i18n="project1Title">Cold 6 (Single)</h3>
+            <p data-i18n="project1Desc">在 Apple Music 上聆听完整单曲作品。</p>
+            <div class="project-link-container">
+              <a href="https://music.apple.com/jp/album/cold-6-single/1694298220" target="_blank" rel="noopener noreferrer" class="external-link">
+                <span class="link-icon">🎵</span>
+                <span class="link-text">
+                  <span class="link-label" data-i18n="appleMusicLabel">Apple Music</span>
+                  <span class="link-subtitle">Cold 6 - Single Album</span>
+                </span>
+                <span class="link-arrow">→</span>
+              </a>
             </div>
           </article>
           <article class="project-card">
             <div class="project-number">02</div>
-            <h3 data-i18n="project2Title">独立乐队现场</h3>
-            <p data-i18n="project2Desc">48轨录音，混制成沉浸式立体声。</p>
-            <div class="audio-player">
-              <audio controls preload="none">
-                <source src="https://samplelib.com/lib/preview/mp3/sample-9s.mp3" type="audio/mpeg" />
-              </audio>
-            </div>
-          </article>
-          <article class="project-card">
-            <div class="project-number">03</div>
-            <h3 data-i18n="project3Title">互动装置声景</h3>
-            <p data-i18n="project3Desc">可根据观众动作生成变化的环境声。</p>
-            <div class="audio-player">
-              <audio controls preload="none">
-                <source src="https://samplelib.com/lib/preview/mp3/sample-3s.mp3" type="audio/mpeg" />
-              </audio>
+            <h3 data-i18n="project2Title">Bilibili 创作空间</h3>
+            <p data-i18n="project2Desc">访问我的 Bilibili 个人空间，查看更多音频与视频作品。</p>
+            <div class="project-link-container">
+              <a href="https://space.bilibili.com/1906591" target="_blank" rel="noopener noreferrer" class="external-link">
+                <span class="link-icon">📺</span>
+                <span class="link-text">
+                  <span class="link-label" data-i18n="bilibiliLabel">Bilibili</span>
+                  <span class="link-subtitle">@K Audio Lab</span>
+                </span>
+                <span class="link-arrow">→</span>
+              </a>
             </div>
           </article>
         </div>
@@ -947,7 +1015,7 @@
           <p data-i18n="contactBody">
             接受远程协作、日本各地驻场与完整后期流程。
           </p>
-          <a href="mailto:hello@kaudio.studio" class="contact-btn" data-i18n="contactCTA">
+          <a href="mailto:xskk1998@gmail.com" class="contact-btn" data-i18n="contactCTA">
             预约沟通
           </a>
         </div>
@@ -976,13 +1044,13 @@
           specialty3Title: "现场采录",
           specialty3Body: "演唱会、戏剧与艺术装置的多轨录音与快速交付。",
           portfolioHeading: "近期项目",
-          portfolioSubheading: "精选片段，建议佩戴耳机。",
-          project1Title: "霓虹黑色预告",
-          project1Desc: "金属打击与低频气压交织的Atmos混音。",
-          project2Title: "独立乐队现场",
-          project2Desc: "48轨录音，混制成沉浸式立体声。",
-          project3Title: "互动装置声景",
-          project3Desc: "可根据观众动作生成变化的环境声。",
+          portfolioSubheading: "访问我的音乐平台与创作空间。",
+          project1Title: "Cold 6 (Single)",
+          project1Desc: "在 Apple Music 上聆听完整单曲作品。",
+          appleMusicLabel: "Apple Music",
+          project2Title: "Bilibili 创作空间",
+          project2Desc: "访问我的 Bilibili 个人空间，查看更多音频与视频作品。",
+          bilibiliLabel: "Bilibili",
           contactHeading: "与我合作",
           contactBody: "接受远程协作、日本各地驻场与完整后期流程。",
           contactCTA: "预约沟通"
@@ -1006,13 +1074,13 @@
           specialty3Title: "ライブレコーディング",
           specialty3Body: "コンサート、演劇、体験型アートのマルチトラック収録。",
           portfolioHeading: "最新セッション",
-          portfolioSubheading: "厳選したキューとミックス。ヘッドフォン推奨。",
-          project1Title: "ネオノワール予告",
-          project1Desc: "金属パーカッションとローエンドで緊張感を演出するAtmos。",
-          project2Title: "インディーライブ",
-          project2Desc: "48トラック収録を没入感あるステレオへ仕上げ。",
-          project3Title: "インタラクティブ・インスタレーション",
-          project3Desc: "来場者の動きに反応する生成サウンド。",
+          portfolioSubheading: "音楽配信サービスとクリエイティブスペースへ。",
+          project1Title: "Cold 6 (Single)",
+          project1Desc: "Apple Musicで完全版シングルをお聴きください。",
+          appleMusicLabel: "Apple Music",
+          project2Title: "Bilibili クリエイタースペース",
+          project2Desc: "Bilibiliスペースでオーディオと動画作品をご覧ください。",
+          bilibiliLabel: "Bilibili",
           contactHeading: "一緒に作りましょう",
           contactBody: "リモート案件、日本各地のオンサイト、フルポストまで対応可能。",
           contactCTA: "相談する"
@@ -1036,13 +1104,13 @@
           specialty3Title: "Live Capture",
           specialty3Body: "On-site multitrack recording for concerts, theatre, and experiential art.",
           portfolioHeading: "Recent Sessions",
-          portfolioSubheading: "Selected cues and mixes — headphones recommended.",
-          project1Title: "Neo Noir Trailer",
-          project1Desc: "Atmos teaser with metallic percussion and low-end pressure.",
-          project2Title: "Indie Concert Live",
-          project2Desc: "48-track capture mixed down to immersive stereo.",
-          project3Title: "Interactive Installation",
-          project3Desc: "Generative ambience responding to visitor movement.",
+          portfolioSubheading: "Visit my music platforms and creative spaces.",
+          project1Title: "Cold 6 (Single)",
+          project1Desc: "Listen to the full single on Apple Music.",
+          appleMusicLabel: "Apple Music",
+          project2Title: "Bilibili Creator Space",
+          project2Desc: "Visit my Bilibili space for more audio and video works.",
+          bilibiliLabel: "Bilibili",
           contactHeading: "Let's Create Together",
           contactBody: "Available for remote collaborations, on-site sessions across Japan, and full post pipelines.",
           contactCTA: "Book a call"
