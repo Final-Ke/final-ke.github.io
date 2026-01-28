@@ -221,6 +221,179 @@
         font-weight: 300;
       }
 
+      /* 角色大头照 */
+      .character-portrait {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 80px;
+        animation: fadeInUp 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+      }
+
+      .portrait-frame {
+        position: relative;
+        width: 400px;
+        max-width: 90%;
+        aspect-ratio: 1 / 1;
+        border-radius: 32px;
+        overflow: hidden;
+        background: var(--glass-bg);
+        backdrop-filter: blur(30px);
+        border: 2px solid var(--glass-border);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .portrait-frame::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-lavender), var(--accent-secondary));
+        border-radius: 32px;
+        opacity: 0;
+        transition: opacity 0.6s;
+        z-index: -1;
+      }
+
+      .portrait-frame:hover {
+        transform: scale(1.05) translateY(-8px);
+        border-color: var(--accent);
+        box-shadow:
+          0 32px 100px rgba(0, 255, 255, 0.3),
+          0 0 80px rgba(224, 176, 255, 0.2);
+      }
+
+      .portrait-frame:hover::before {
+        opacity: 0.5;
+      }
+
+      .portrait-frame::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(135deg, rgba(0, 255, 255, 0.1), transparent 50%),
+          linear-gradient(225deg, rgba(224, 176, 255, 0.1), transparent 50%);
+        pointer-events: none;
+      }
+
+      .portrait-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+        filter: brightness(1.05) contrast(1.1);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .portrait-frame:hover img {
+        filter: brightness(1.1) contrast(1.15);
+        transform: scale(1.05);
+      }
+
+      /* 角色标签 */
+      .character-tags {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+        z-index: 2;
+      }
+
+      .character-tag {
+        padding: 8px 16px;
+        background: rgba(10, 10, 15, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--accent-lavender);
+        letter-spacing: 0.05em;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      }
+
+      /* 角色视频 */
+      .character-video {
+        margin-bottom: 80px;
+        animation: fadeInUp 0.8s 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+      }
+
+      .video-container {
+        background: var(--glass-bg);
+        backdrop-filter: blur(30px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .video-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-lavender), var(--accent-secondary));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .video-container:hover {
+        transform: translateY(-8px);
+        border-color: var(--accent);
+        box-shadow: 0 24px 64px rgba(0, 255, 255, 0.2);
+      }
+
+      .video-container:hover::before {
+        transform: scaleX(1);
+      }
+
+      .video-container h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 32px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .video-container h2::before {
+        content: '▶';
+        font-size: 0.8em;
+        color: var(--accent-lavender);
+      }
+
+      .video-wrapper {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        border-radius: 16px;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      }
+
+      .video-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 16px;
+      }
+
       /* 信息卡片网格 */
       .info-grid {
         display: grid;
@@ -486,6 +659,23 @@
           margin-bottom: 60px;
         }
 
+        .character-portrait {
+          margin-bottom: 60px;
+        }
+
+        .portrait-frame {
+          width: 320px;
+        }
+
+        .character-tags {
+          gap: 8px;
+        }
+
+        .character-tag {
+          padding: 6px 12px;
+          font-size: 0.7rem;
+        }
+
         .info-grid {
           grid-template-columns: 1fr;
         }
@@ -522,6 +712,33 @@
         <h1 data-i18n="characterName">星音 ミル</h1>
         <div class="subtitle">Hoshime Miru</div>
         <div class="theme" data-i18n="theme">電脳サイバー猫 × 清楚系アイドル</div>
+      </section>
+
+      <!-- 角色大头照 -->
+      <section class="character-portrait">
+        <div class="portrait-frame">
+          <img src="./VRM.PNG" alt="星音 ミル Portrait">
+          <div class="character-tags">
+            <span class="character-tag" data-i18n="tagAge">16歳</span>
+            <span class="character-tag" data-i18n="tagType">サイバー猫</span>
+            <span class="character-tag" data-i18n="tagIdol">清楚系</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 角色介绍视频 -->
+      <section class="character-video">
+        <div class="video-container">
+          <h2 data-i18n="videoTitle">Vtuber一問一答自己紹介</h2>
+          <div class="video-wrapper">
+            <iframe
+              src="https://www.youtube.com/embed/K25SFONHSlE"
+              title="星音 ミル Character Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
       </section>
 
       <!-- 信息卡片网格 -->
@@ -669,7 +886,11 @@
           colorAmberUse: "金具、右目",
           vroidTitle: "VRoid Hub でモデルを見る",
           vroidDesc: "完全な3Dモデルと詳細設定はVRoid Hubでご覧いただけます。",
-          vroidButton: "VRoid Hub で開く"
+          vroidButton: "VRoid Hub で開く",
+          tagAge: "16歳",
+          tagType: "サイバー猫",
+          tagIdol: "清楚系",
+          videoTitle: "キャラクター紹介動画"
         },
         zh: {
           homeLink: "返回主页",
@@ -704,7 +925,11 @@
           colorAmberUse: "金属件、右眼",
           vroidTitle: "在 VRoid Hub 查看模型",
           vroidDesc: "完整的3D模型和详细设定可在VRoid Hub查看。",
-          vroidButton: "打开 VRoid Hub"
+          vroidButton: "打开 VRoid Hub",
+          tagAge: "16岁",
+          tagType: "赛博猫",
+          tagIdol: "清纯系",
+          videoTitle: "角色介绍视频"
         },
         en: {
           homeLink: "Back to Home",
@@ -739,7 +964,11 @@
           colorAmberUse: "Metal parts, right eye",
           vroidTitle: "View Model on VRoid Hub",
           vroidDesc: "The complete 3D model and detailed settings are available on VRoid Hub.",
-          vroidButton: "Open VRoid Hub"
+          vroidButton: "Open VRoid Hub",
+          tagAge: "16 y.o.",
+          tagType: "Cyber Cat",
+          tagIdol: "Pure Idol",
+          videoTitle: "Character Introduction Video"
         }
       };
 
