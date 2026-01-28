@@ -119,14 +119,16 @@
         z-index: 0;
         overflow: hidden;
         background: var(--bg);
+        pointer-events: none;
       }
 
       /* 视频背景 */
       .video-background {
         position: fixed;
         inset: 0;
-        z-index: 0;
+        z-index: 1;
         overflow: hidden;
+        pointer-events: none;
       }
 
       .video-background video {
@@ -139,8 +141,18 @@
         height: auto;
         transform: translate(-50%, -50%);
         object-fit: cover;
-        opacity: 0.15;
-        filter: contrast(1.2) brightness(0.9);
+        display: none; /* 隐藏原始视频，只显示 canvas */
+      }
+
+      /* Canvas 点阵滤镜 */
+      #halftoneCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        mix-blend-mode: screen;
       }
 
       .particle {
@@ -172,6 +184,7 @@
       .grid-overlay {
         position: fixed;
         inset: 0;
+        z-index: 2;
         background-image:
           linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
           linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
@@ -738,9 +751,12 @@
 
     <!-- 视频背景 -->
     <div class="video-background">
-      <video id="bgVideo" autoplay muted loop playsinline>
+      <video id="bgVideo" autoplay muted loop playsinline preload="auto" crossorigin="anonymous">
         <source src="https://github.com/Final-Ke/final-ke.github.io/raw/refs/heads/main/Bad%20apple.mp4" type="video/mp4" />
+        您的浏览器不支持视频标签。
       </video>
+      <canvas id="halftoneCanvas"></canvas>
+      <canvas id="tempCanvas" style="display: none;"></canvas>
     </div>
 
     <div class="background" id="background"></div>
@@ -976,10 +992,23 @@
       const lyricsSection = document.getElementById("lyrics");
       const ctx = canvas.getContext("2d");
 
+      // 点阵滤镜相关
+      const halftoneCanvas = document.getElementById("halftoneCanvas");
+      const tempCanvas = document.getElementById("tempCanvas");
+      const halftoneCtx = halftoneCanvas.getContext("2d");
+      const tempCtx = tempCanvas.getContext("2d", { willReadFrequently: true });
+
       let currentLang = localStorage.getItem("landingLang") || "zh";
       let isPlaying = false;
       let analyser, audioCtx, dataArray;
       let autoplayAttempted = false;
+      let halftoneAnimationId;
+      let isVideoPlaying = false;
+
+      // 点阵配置
+      const CELL_SIZE = 10;  // 网格大小
+      const SHAPE = 'square'; // 形状：square 或 circle
+      const GAP = 1;          // 间隙
 
       function setLanguage(lang) {
         const pack = translations[lang];
@@ -1101,19 +1130,185 @@
 
       // 确保视频背景自动播放
       async function ensureVideoPlays() {
+        if (!bgVideo) {
+          console.error('视频元素未找到');
+          return;
+        }
+
+        console.log('视频元素状态:', {
+          src: bgVideo.currentSrc,
+          readyState: bgVideo.readyState,
+          networkState: bgVideo.networkState,
+          paused: bgVideo.paused,
+          muted: bgVideo.muted
+        });
+
+        // 确保视频已静音
+        bgVideo.muted = true;
+        bgVideo.volume = 0;
+
         try {
-          await bgVideo.play();
-          console.log('视频背景已开始播放');
+          const playPromise = bgVideo.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+            console.log('✓ 视频背景已成功播放');
+            // 启动点阵效果
+            startHalftoneEffect();
+          }
         } catch (err) {
-          console.log('视频自动播放失败，尝试静音播放:', err);
-          bgVideo.muted = true;
+          console.error('视频播放失败:', err.name, err.message);
+
+          // 尝试重新加载视频
           try {
+            bgVideo.load();
             await bgVideo.play();
+            console.log('✓ 视频重新加载后播放成功');
+            // 启动点阵效果
+            startHalftoneEffect();
           } catch (retryErr) {
             console.error('视频播放完全失败:', retryErr);
           }
         }
       }
+
+      // 监听视频事件
+      bgVideo.addEventListener('loadeddata', () => {
+        console.log('✓ 视频数据已加载');
+      });
+
+      bgVideo.addEventListener('canplay', () => {
+        console.log('✓ 视频可以播放');
+      });
+
+      bgVideo.addEventListener('playing', () => {
+        console.log('✓ 视频正在播放');
+      });
+
+      bgVideo.addEventListener('error', (e) => {
+        console.error('✗ 视频加载错误:', e, bgVideo.error);
+      });
+
+      // 调整 canvas 尺寸
+      function resizeHalftoneCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        halftoneCanvas.width = window.innerWidth * dpr;
+        halftoneCanvas.height = window.innerHeight * dpr;
+        halftoneCanvas.style.width = window.innerWidth + 'px';
+        halftoneCanvas.style.height = window.innerHeight + 'px';
+        halftoneCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      // 点阵渲染函数
+      function drawHalftone() {
+        if (!bgVideo || bgVideo.paused || bgVideo.ended || !isVideoPlaying) {
+          return;
+        }
+
+        const width = halftoneCanvas.width / (window.devicePixelRatio || 1);
+        const height = halftoneCanvas.height / (window.devicePixelRatio || 1);
+
+        // 计算采样分辨率
+        const cols = Math.ceil(width / CELL_SIZE);
+        const rows = Math.ceil(height / CELL_SIZE);
+
+        // 设置临时 canvas 大小
+        if (tempCanvas.width !== cols || tempCanvas.height !== rows) {
+          tempCanvas.width = cols;
+          tempCanvas.height = rows;
+        }
+
+        // 计算视频居中位置
+        const vRatio = bgVideo.videoWidth / bgVideo.videoHeight;
+        const cRatio = cols / rows;
+        let sWidth, sHeight, sx, sy;
+
+        if (cRatio > vRatio) {
+          sHeight = rows;
+          sWidth = rows * vRatio;
+          sx = (cols - sWidth) / 2;
+          sy = 0;
+        } else {
+          sWidth = cols;
+          sHeight = cols / vRatio;
+          sx = 0;
+          sy = (rows - sHeight) / 2;
+        }
+
+        // 清空并绘制视频帧到临时 canvas
+        tempCtx.fillStyle = '#000000';
+        tempCtx.fillRect(0, 0, cols, rows);
+        tempCtx.drawImage(bgVideo, sx, sy, sWidth, sHeight);
+
+        // 读取像素数据
+        const frameData = tempCtx.getImageData(0, 0, cols, rows).data;
+
+        // 清空主 canvas
+        halftoneCtx.clearRect(0, 0, width, height);
+
+        // 设置绘图样式
+        halftoneCtx.fillStyle = '#00ffff'; // 青色点阵
+
+        // 遍历并绘制点阵
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const index = (y * cols + x) * 4;
+            const r = frameData[index];
+            const g = frameData[index + 1];
+            const b = frameData[index + 2];
+
+            // 计算亮度
+            const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+            // 跳过太暗的像素
+            if (brightness < 0.05) continue;
+
+            // 计算位置
+            const posX = x * CELL_SIZE;
+            const posY = y * CELL_SIZE;
+
+            // 根据亮度决定大小
+            const size = (CELL_SIZE - GAP) * brightness;
+            const offset = (CELL_SIZE - size) / 2;
+
+            if (SHAPE === 'square') {
+              halftoneCtx.fillRect(posX + offset, posY + offset, size, size);
+            } else if (SHAPE === 'circle') {
+              halftoneCtx.beginPath();
+              halftoneCtx.arc(posX + CELL_SIZE/2, posY + CELL_SIZE/2, size/2, 0, Math.PI * 2);
+              halftoneCtx.fill();
+            }
+          }
+        }
+
+        halftoneAnimationId = requestAnimationFrame(drawHalftone);
+      }
+
+      // 启动点阵渲染
+      function startHalftoneEffect() {
+        if (!isVideoPlaying) {
+          isVideoPlaying = true;
+          resizeHalftoneCanvas();
+          drawHalftone();
+          console.log('✓ 点阵效果已启动');
+        }
+      }
+
+      // 监听视频播放事件
+      bgVideo.addEventListener('playing', () => {
+        startHalftoneEffect();
+      });
+
+      bgVideo.addEventListener('pause', () => {
+        isVideoPlaying = false;
+        if (halftoneAnimationId) {
+          cancelAnimationFrame(halftoneAnimationId);
+        }
+      });
+
+      // 窗口大小改变时重新调整
+      window.addEventListener('resize', () => {
+        resizeHalftoneCanvas();
+      });
 
       // 歌词同步与交互
       const lyricLines = Array.from(document.querySelectorAll(".lyrics-lines p"));
@@ -1246,15 +1441,38 @@
 
       // 页面加载时也尝试启动视频（备用）
       window.addEventListener('load', () => {
+        console.log('页面加载完成，尝试播放视频');
         ensureVideoPlays();
       });
 
-      // 用户首次交互时确保音频上下文激活
-      document.addEventListener('click', () => {
+      // DOMContentLoaded 时也尝试
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM加载完成，初始化视频');
+        if (bgVideo) {
+          bgVideo.muted = true;
+          ensureVideoPlays();
+        }
+      });
+
+      // 用户首次交互时确保音频上下文激活和视频播放
+      document.addEventListener('click', async () => {
         if (audioCtx && audioCtx.state === 'suspended') {
           audioCtx.resume();
         }
+        // 如果视频暂停，尝试播放
+        if (bgVideo && bgVideo.paused) {
+          try {
+            await bgVideo.play();
+            console.log('用户交互后视频开始播放');
+            startHalftoneEffect();
+          } catch (err) {
+            console.error('用户交互后视频仍无法播放:', err);
+          }
+        }
       }, { once: true });
+
+      // 初始化 canvas 尺寸
+      resizeHalftoneCanvas();
 
       bgmToggle.addEventListener("click", toggleBGM);
       window.addEventListener("resize", resizeCanvas);
