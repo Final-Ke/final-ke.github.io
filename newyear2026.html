@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800;900&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
     <style>
@@ -15,12 +15,11 @@
         color-scheme: dark;
         --bg: #0a0508;
         --text: #f8f8f8;
-        --muted: rgba(248, 248, 248, 0.7);
-        --line: rgba(248, 248, 248, 0.15);
+        --muted: rgba(248, 248, 248, 0.75);
         --accent: #f6d365;
         --accent-secondary: #fda085;
-        --accent-glow: rgba(246, 211, 101, 0.4);
-        --glass-bg: rgba(255, 255, 255, 0.05);
+        --accent-glow: rgba(246, 211, 101, 0.5);
+        --glass-bg: rgba(255, 255, 255, 0.04);
         --glass-border: rgba(255, 255, 255, 0.1);
       }
 
@@ -39,78 +38,83 @@
         overflow-x: hidden;
       }
 
-      /* 动态背景光效 */
-      .glow-container {
+      /* 动态渐变背景 */
+      .animated-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background:
+          radial-gradient(ellipse at 30% 20%, rgba(246, 211, 101, 0.2), transparent 50%),
+          radial-gradient(ellipse at 70% 80%, rgba(253, 160, 133, 0.15), transparent 50%),
+          radial-gradient(ellipse at 50% 50%, rgba(255, 200, 100, 0.08), transparent 60%),
+          var(--bg);
+        animation: bgPulse 15s ease-in-out infinite;
+      }
+
+      @keyframes bgPulse {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.9;
+          transform: scale(1.05);
+        }
+      }
+
+      /* 烟花粒子 */
+      .fireworks-container {
         position: fixed;
         inset: 0;
         z-index: 0;
         overflow: hidden;
-        background: radial-gradient(ellipse at 50% 30%, rgba(246, 211, 101, 0.1), transparent 60%),
-                    radial-gradient(ellipse at 80% 70%, rgba(253, 160, 133, 0.08), transparent 50%),
-                    var(--bg);
+        pointer-events: none;
       }
 
-      .orb {
+      .firework {
         position: absolute;
-        border-radius: 50%;
-        filter: blur(60px);
-        opacity: 0;
-        animation: orbFloat 8s ease-in-out infinite, orbFade 4s ease-in-out infinite;
-      }
-
-      .orb-1 {
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(246, 211, 101, 0.4), transparent);
-        top: -100px;
-        right: -100px;
-        animation-delay: 0s;
-      }
-
-      .orb-2 {
-        width: 350px;
-        height: 350px;
-        background: radial-gradient(circle, rgba(253, 160, 133, 0.3), transparent);
-        bottom: -80px;
-        left: -80px;
-        animation-delay: -2s;
-      }
-
-      .orb-3 {
-        width: 250px;
-        height: 250px;
-        background: radial-gradient(circle, rgba(246, 211, 101, 0.25), transparent);
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        animation-delay: -4s;
-      }
-
-      @keyframes orbFloat {
-        0%, 100% { transform: translateY(0) scale(1); }
-        50% { transform: translateY(30px) scale(1.05); }
-      }
-
-      @keyframes orbFade {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 0.9; }
-      }
-
-      /* 粒子效果 */
-      .particle {
-        position: absolute;
-        width: 3px;
-        height: 3px;
+        width: 4px;
+        height: 4px;
         background: var(--accent);
         border-radius: 50%;
+        box-shadow: 0 0 15px var(--accent-glow);
+        animation: explode 2s ease-out forwards;
+      }
+
+      @keyframes explode {
+        0% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(var(--tx), var(--ty)) scale(0);
+          opacity: 0;
+        }
+      }
+
+      /* 金色粒子雨 */
+      .particle-rain {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .golden-particle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        border-radius: 50%;
         opacity: 0;
-        animation: particleRise linear infinite;
+        animation: fall linear infinite;
         box-shadow: 0 0 10px var(--accent-glow);
       }
 
-      @keyframes particleRise {
+      @keyframes fall {
         0% {
-          transform: translateY(100vh) translateX(0) scale(0);
+          transform: translateY(-100px) rotate(0deg);
           opacity: 0;
         }
         10% {
@@ -120,39 +124,27 @@
           opacity: 1;
         }
         100% {
-          transform: translateY(-100px) translateX(var(--drift, 50px)) scale(1);
+          transform: translateY(100vh) rotate(360deg);
           opacity: 0;
         }
-      }
-
-      .grid-overlay {
-        position: fixed;
-        inset: 0;
-        background-image:
-          linear-gradient(rgba(246, 211, 101, 0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(246, 211, 101, 0.03) 1px, transparent 1px);
-        background-size: 50px 50px;
-        opacity: 0.4;
-        pointer-events: none;
-        z-index: 0;
       }
 
       /* Header */
       header {
         position: relative;
-        z-index: 10;
-        padding: 24px clamp(20px, 5vw, 100px);
+        z-index: 100;
+        padding: 24px clamp(24px, 5vw, 100px);
         display: flex;
-        flex-wrap: wrap;
         justify-content: space-between;
-        gap: 20px;
-        animation: slideDown 0.8s ease-out;
+        align-items: center;
+        gap: 24px;
+        animation: headerFade 1s ease-out;
       }
 
-      @keyframes slideDown {
+      @keyframes headerFade {
         from {
           opacity: 0;
-          transform: translateY(-30px);
+          transform: translateY(-40px);
         }
         to {
           opacity: 1;
@@ -166,52 +158,69 @@
         gap: 12px;
         color: var(--text);
         text-decoration: none;
-        padding: 12px 24px;
+        padding: 14px 28px;
         background: var(--glass-bg);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(30px);
         border: 1px solid var(--glass-border);
-        border-radius: 12px;
-        font-weight: 500;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 16px;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
       }
 
       .back-link::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(246, 211, 101, 0.2), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.5s;
+      }
+
+      .back-link::after {
         content: '←';
-        font-size: 1.2em;
-        transition: transform 0.3s;
+        font-size: 1.3em;
+        transition: transform 0.4s;
       }
 
       .back-link:hover {
-        background: rgba(246, 211, 101, 0.1);
+        background: rgba(246, 211, 101, 0.15);
         border-color: var(--accent);
-        transform: translateX(-4px);
+        transform: translateX(-6px) scale(1.05);
+        box-shadow: 0 8px 32px var(--accent-glow);
       }
 
       .back-link:hover::before {
-        transform: translateX(-4px);
+        transform: translateX(0);
+      }
+
+      .back-link:hover::after {
+        transform: translateX(-6px);
       }
 
       .lang-switch {
         display: flex;
-        gap: 8px;
-        padding: 4px;
+        gap: 6px;
+        padding: 6px;
         background: var(--glass-bg);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(30px);
         border: 1px solid var(--glass-border);
-        border-radius: 12px;
+        border-radius: 16px;
       }
 
       .lang-switch button {
         background: transparent;
         border: none;
         color: var(--muted);
-        padding: 8px 18px;
-        border-radius: 8px;
+        padding: 10px 22px;
+        border-radius: 12px;
         cursor: pointer;
         font-size: 0.85rem;
-        font-weight: 500;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
+        overflow: hidden;
       }
 
       .lang-switch button::before {
@@ -219,9 +228,8 @@
         position: absolute;
         inset: 0;
         background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-        border-radius: 8px;
         opacity: 0;
-        transition: opacity 0.3s;
+        transition: opacity 0.4s;
       }
 
       .lang-switch button span {
@@ -231,60 +239,148 @@
 
       .lang-switch button.active {
         color: var(--bg);
+        transform: scale(1.05);
       }
 
       .lang-switch button.active::before {
         opacity: 1;
       }
 
-      .lang-switch button:hover:not(.active) {
-        color: var(--text);
-        background: rgba(246, 211, 101, 0.1);
-      }
-
       /* Main Content */
       main {
         position: relative;
         z-index: 2;
-        max-width: 1100px;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 40px clamp(20px, 5vw, 100px) 100px;
-        display: flex;
-        flex-direction: column;
-        gap: 40px;
+        padding: 40px clamp(24px, 5vw, 100px) 120px;
       }
 
-      /* Hero Section */
+      /* Hero with typing effect */
       .hero {
-        padding: 60px clamp(32px, 6vw, 80px);
+        padding: 80px clamp(40px, 6vw, 100px);
         background: var(--glass-bg);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(40px) saturate(150%);
         border: 1px solid var(--glass-border);
-        border-radius: 32px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-        animation: fadeUp 0.8s ease-out;
+        border-radius: 40px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
         position: relative;
         overflow: hidden;
+        margin-bottom: 60px;
+        animation: heroScale 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      @keyframes heroScale {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
       }
 
       .hero::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 200%;
-        background: linear-gradient(180deg, rgba(246, 211, 101, 0.1), transparent);
-        opacity: 0.5;
-        pointer-events: none;
+        inset: -50%;
+        background: conic-gradient(from 0deg, transparent, var(--accent-glow), transparent);
+        animation: rotate 8s linear infinite;
       }
 
-      .hero > * {
+      @keyframes rotate {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .hero::after {
+        content: '';
+        position: absolute;
+        inset: 3px;
+        background: var(--bg);
+        border-radius: 38px;
+        opacity: 0.95;
+      }
+
+      .hero-content {
         position: relative;
         z-index: 1;
       }
 
-      @keyframes fadeUp {
+      .eyebrow {
+        display: inline-block;
+        padding: 10px 24px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        color: var(--bg);
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-bottom: 32px;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          transform: scale(1);
+          box-shadow: 0 0 20px var(--accent-glow);
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 40px var(--accent-glow);
+        }
+      }
+
+      .hero h1 {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(2.8rem, 6vw, 5.5rem);
+        font-weight: 900;
+        line-height: 1.1;
+        margin-bottom: 32px;
+        background: linear-gradient(135deg, var(--accent) 0%, #fff 40%, var(--accent-secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        background-size: 200% 100%;
+        animation: shimmer 4s ease-in-out infinite;
+      }
+
+      @keyframes shimmer {
+        0%, 100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+
+      .hero-subtitle {
+        font-size: 1.15rem;
+        line-height: 1.9;
+        color: var(--muted);
+        max-width: 800px;
+      }
+
+      /* Blessing Card with ripple effect */
+      .blessing {
+        padding: 60px 50px;
+        background: linear-gradient(135deg, rgba(246, 211, 101, 0.08), rgba(253, 160, 133, 0.08));
+        backdrop-filter: blur(40px);
+        border: 2px solid var(--glass-border);
+        border-left: 6px solid var(--accent);
+        border-radius: 32px;
+        line-height: 2;
+        font-size: 1.15rem;
+        margin-bottom: 60px;
+        position: relative;
+        overflow: hidden;
+        animation: fadeIn 1s 0.3s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      @keyframes fadeIn {
         from {
           opacity: 0;
           transform: translateY(40px);
@@ -295,158 +391,80 @@
         }
       }
 
-      .hero p:first-child {
-        text-transform: uppercase;
-        letter-spacing: 0.2em;
-        font-size: 0.85rem;
-        color: var(--accent);
-        font-weight: 600;
-        margin-bottom: 16px;
+      .blessing::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--accent-glow), transparent);
+        transform: translate(-50%, -50%);
+        transition: all 0.8s ease-out;
       }
 
-      .hero h1 {
-        margin: 0 0 24px;
-        font-family: "Syne", sans-serif;
-        font-size: clamp(2.5rem, 6vw, 4.5rem);
-        font-weight: 800;
-        line-height: 1.1;
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .hero p:last-child {
-        line-height: 1.8;
-        color: var(--muted);
-        font-size: 1.05rem;
-      }
-
-      /* Blessing Card */
-      .blessing {
-        padding: 48px;
-        background: linear-gradient(135deg, rgba(246, 211, 101, 0.05), rgba(253, 160, 133, 0.05));
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 28px;
-        border-left: 4px solid var(--accent);
-        line-height: 1.9;
-        font-size: 1.1rem;
-        animation: fadeUp 0.8s ease-out 0.2s both;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      .blessing:hover::before {
+        width: 600px;
+        height: 600px;
+        opacity: 0;
       }
 
       .blessing:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 24px 80px var(--accent-glow);
+        transform: translateY(-6px);
+        box-shadow: 0 32px 100px var(--accent-glow);
+        border-color: var(--accent);
       }
 
       /* Audio Card */
-      .audio-card {
-        padding: 40px;
+      .audio-section {
+        padding: 60px 50px;
         background: var(--glass-bg);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(40px);
         border: 1px solid var(--glass-border);
-        border-radius: 28px;
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        animation: fadeUp 0.8s ease-out 0.4s both;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        border-radius: 36px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+        animation: fadeIn 1s 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
       }
 
-      .audio-head {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
+      .audio-header {
+        margin-bottom: 40px;
       }
 
-      .audio-head strong {
+      .audio-title {
         font-family: "Syne", sans-serif;
-        font-size: 1.5rem;
+        font-size: 2rem;
+        font-weight: 800;
         color: var(--accent);
+        margin-bottom: 16px;
+        text-shadow: 0 0 30px var(--accent-glow);
       }
 
-      .audio-head p {
+      .audio-desc {
         color: var(--muted);
-        line-height: 1.7;
+        line-height: 1.8;
+        font-size: 1.05rem;
       }
 
-      .audio-controls {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-
-      .button {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: none;
-        font-family: inherit;
-      }
-
-      .button.ghost {
-        background: rgba(246, 211, 101, 0.1);
-        border: 1px solid var(--accent);
-        color: var(--accent);
-      }
-
-      .button.ghost:hover {
-        background: rgba(246, 211, 101, 0.2);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px var(--accent-glow);
-      }
-
-      .button.ghost.active {
-        background: var(--accent);
-        color: var(--bg);
-      }
-
-      .button.primary {
-        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-        color: var(--bg);
-        box-shadow: 0 4px 20px var(--accent-glow);
-      }
-
-      .button.primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px var(--accent-glow);
-      }
-
-      .button.secondary {
-        border: 1px solid var(--line);
-        color: var(--text);
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      .button.secondary:hover {
-        border-color: var(--accent);
-        background: rgba(246, 211, 101, 0.1);
-        transform: translateY(-2px);
-      }
-
-      /* Visualizer */
-      .visualizer {
+      /* Visualizer with advanced effects */
+      .visualizer-wrap {
         position: relative;
-        width: 100%;
-        height: 300px;
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 16px;
+        margin: 40px 0;
+        border-radius: 24px;
         overflow: hidden;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--glass-border);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      #vizCanvas {
+      .visualizer-wrap:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 60px var(--accent-glow);
+      }
+
+      canvas {
         width: 100%;
-        height: 100%;
+        height: 350px;
         display: block;
       }
 
@@ -456,50 +474,167 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        transition: opacity 0.4s;
         pointer-events: none;
       }
 
-      .viz-overlay span {
-        padding: 12px 24px;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(10px);
-        border-radius: 8px;
-        font-size: 0.85rem;
-        color: var(--muted);
+      .viz-overlay.hidden {
+        opacity: 0;
       }
 
-      /* Audio Element */
+      .viz-overlay span {
+        padding: 16px 32px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--accent);
+        border-radius: 16px;
+        font-size: 0.9rem;
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      /* Controls */
+      .controls {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin: 32px 0;
+      }
+
+      .control-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 28px;
+        background: rgba(246, 211, 101, 0.1);
+        border: 2px solid var(--accent);
+        color: var(--accent);
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .control-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s;
+      }
+
+      .control-btn span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .control-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 12px 36px var(--accent-glow);
+      }
+
+      .control-btn:hover::before {
+        transform: scaleX(1);
+      }
+
+      .control-btn.active {
+        background: var(--accent);
+        color: var(--bg);
+      }
+
+      .control-btn:hover span {
+        color: var(--bg);
+      }
+
+      /* Audio player */
       audio {
         width: 100%;
-        height: 52px;
-        border-radius: 12px;
+        height: 60px;
+        border-radius: 16px;
         outline: none;
+        filter: brightness(1.3) saturate(1.5);
+        margin: 32px 0;
       }
 
-      audio::-webkit-media-controls-panel {
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 12px;
-      }
-
-      /* Actions */
+      /* Action buttons */
       .actions {
         display: flex;
+        gap: 20px;
         flex-wrap: wrap;
-        gap: 16px;
+      }
+
+      .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 40px;
+        border-radius: 16px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        border: none;
+      }
+
+      .action-btn.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        color: var(--bg);
+        box-shadow: 0 12px 40px var(--accent-glow);
+      }
+
+      .action-btn.primary::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
+        transform: translateX(-100%) skew(-20deg);
+        transition: transform 0.6s;
+      }
+
+      .action-btn.primary:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 16px 56px var(--accent-glow);
+      }
+
+      .action-btn.primary:hover::before {
+        transform: translateX(200%) skew(-20deg);
+      }
+
+      .action-btn.secondary {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 2px solid var(--glass-border);
+        color: var(--text);
+      }
+
+      .action-btn.secondary:hover {
+        border-color: var(--accent);
+        background: rgba(246, 211, 101, 0.1);
+        transform: translateY(-4px);
       }
 
       /* Footer */
       footer {
         text-align: center;
         color: var(--muted);
-        font-size: 0.9rem;
+        font-size: 1rem;
+        padding: 60px 0 40px;
         position: relative;
         z-index: 2;
-        padding-bottom: 40px;
-        animation: fadeUp 0.8s ease-out 0.6s both;
+        animation: fadeIn 1s 0.7s cubic-bezier(0.4, 0, 0.2, 1) backwards;
       }
 
-      /* 响应式设计 */
+      /* Responsive */
       @media (max-width: 768px) {
         header {
           flex-direction: column;
@@ -512,28 +647,34 @@
         }
 
         main {
-          padding: 20px 20px 60px;
+          padding: 20px 24px 80px;
         }
 
         .hero,
         .blessing,
-        .audio-card {
-          padding: 32px 24px;
+        .audio-section {
+          padding: 40px 28px;
         }
 
-        .visualizer {
-          height: 200px;
+        canvas {
+          height: 250px;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+
+        .action-btn {
+          width: 100%;
+          justify-content: center;
         }
       }
     </style>
   </head>
   <body>
-    <div class="glow-container" id="glowContainer">
-      <div class="orb orb-1"></div>
-      <div class="orb orb-2"></div>
-      <div class="orb orb-3"></div>
-    </div>
-    <div class="grid-overlay"></div>
+    <div class="animated-bg"></div>
+    <div class="fireworks-container" id="fireworks"></div>
+    <div class="particle-rain" id="particleRain"></div>
 
     <header>
       <a href="index.html" class="back-link">
@@ -548,69 +689,66 @@
 
     <main>
       <section class="hero">
-        <p data-i18n="heroEyebrow">2026 · GOLDEN RESONANCE</p>
-        <h1 data-i18n="heroTitle">愿所有声音在新年结成光的余韵</h1>
-        <p data-i18n="heroSubtitle">
-          这份祝福由胶带回声、模拟振幅与城市的呼吸录制。送给所有同行、朋友与远方的你。
-        </p>
+        <div class="hero-content">
+          <span class="eyebrow" data-i18n="heroEyebrow">2026 · GOLDEN RESONANCE</span>
+          <h1 data-i18n="heroTitle">愿所有声音在新年结成光的余韵</h1>
+          <p class="hero-subtitle" data-i18n="heroSubtitle">
+            这份祝福由胶带回声、模拟振幅与城市的呼吸录制。送给所有同行、朋友与远方的你。
+          </p>
+        </div>
       </section>
 
       <section class="blessing" data-i18n="blessingText">
         愿2026年的每一次启动都像温暖的渐强:音量缓慢推开,旋钮稳重而果敢。愿你在忙碌里保持一段静默,让灵感像低频一样渗透;愿你最终的母带足够响亮,却依旧保留柔软的动态。
       </section>
 
-      <section class="audio-card">
-        <div class="audio-head">
-          <div>
-            <strong data-i18n="audioTitle">声波祝福片段</strong>
-            <p data-i18n="audioDesc">建议佩戴耳机聆听,感受低频与钟鸣的交织。</p>
-          </div>
-          <div class="audio-controls">
-            <button class="button ghost" id="vizToggle" data-i18n="vizStart">启动可视化</button>
-            <button class="button ghost active" id="pulseToggle" data-i18n="pulseOn">互动光场:开</button>
-          </div>
+      <section class="audio-section">
+        <div class="audio-header">
+          <h2 class="audio-title" data-i18n="audioTitle">声波祝福片段</h2>
+          <p class="audio-desc" data-i18n="audioDesc">
+            建议佩戴耳机聆听,感受低频与钟鸣的交织。
+          </p>
         </div>
 
-        <div class="visualizer" id="visualizer">
+        <div class="controls">
+          <button class="control-btn" id="vizToggle">
+            <span data-i18n="vizStart">启动可视化</span>
+          </button>
+          <button class="control-btn active" id="pulseToggle">
+            <span data-i18n="pulseOn">互动光场:开</span>
+          </button>
+          <button class="control-btn" id="fireworkToggle">
+            <span data-i18n="fireworkOn">烟花效果:开</span>
+          </button>
+        </div>
+
+        <div class="visualizer-wrap">
           <canvas id="vizCanvas"></canvas>
-          <div class="viz-overlay">
+          <div class="viz-overlay" id="vizOverlay">
             <span data-i18n="vizHint">点击播放并移动鼠标,让声波追随。</span>
           </div>
         </div>
 
         <audio id="greetingAudio" controls preload="none">
           <source src="Newyear2026.mp3" type="audio/mpeg" />
-          Your browser does not support the audio element.
         </audio>
 
         <div class="actions">
-          <a class="button primary" href="Newyear2026.mp3" download data-i18n="downloadBtn">下载音频</a>
-          <a class="button secondary" href="mailto:xskk1998@gmail.com?subject=2026%20New%20Year" data-i18n="replyBtn">回传你的频率</a>
+          <a class="action-btn primary" href="Newyear2026.mp3" download data-i18n="downloadBtn">
+            下载音频
+          </a>
+          <a class="action-btn secondary" href="mailto:xskk1998@gmail.com?subject=2026%20New%20Year" data-i18n="replyBtn">
+            回传你的频率
+          </a>
         </div>
       </section>
     </main>
 
-    <footer data-i18n="footer">K Audio Lab · 向2026举杯,愿每个频段都有祝福</footer>
+    <footer data-i18n="footer">
+      K Audio Lab · 向2026举杯,愿每个频段都有祝福
+    </footer>
 
     <script>
-      // 创建粒子
-      function createParticles() {
-        const container = document.getElementById('glowContainer');
-        const particleCount = 40;
-
-        for (let i = 0; i < particleCount; i++) {
-          const particle = document.createElement('div');
-          particle.className = 'particle';
-          particle.style.left = Math.random() * 100 + '%';
-          particle.style.setProperty('--drift', (Math.random() * 100 - 50) + 'px');
-          particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
-          particle.style.animationDelay = Math.random() * 5 + 's';
-          container.appendChild(particle);
-        }
-      }
-
-      createParticles();
-
       const translations = {
         zh: {
           pageTitle: "K的2026声波祝福",
@@ -623,9 +761,10 @@
           audioDesc: "建议佩戴耳机聆听,感受低频与钟鸣的交织。",
           vizStart: "启动可视化",
           vizReady: "可视化已启动",
-          vizFail: "可视化不可用",
           pulseOn: "互动光场:开",
           pulseOff: "互动光场:关",
+          fireworkOn: "烟花效果:开",
+          fireworkOff: "烟花效果:关",
           vizHint: "点击播放并移动鼠标,让声波追随。",
           downloadBtn: "下载音频",
           replyBtn: "回传你的频率",
@@ -642,9 +781,10 @@
           audioDesc: "ヘッドフォンでの試聴がおすすめ。低域と鐘の響きをお楽しみください。",
           vizStart: "可視化を起動",
           vizReady: "可視化が有効",
-          vizFail: "可視化を利用できません",
           pulseOn: "インタラクティブ:オン",
           pulseOff: "インタラクティブ:オフ",
+          fireworkOn: "花火エフェクト:オン",
+          fireworkOff: "花火エフェクト:オフ",
           vizHint: "再生しながらカーソルを動かすと光が追いかけます。",
           downloadBtn: "音源をダウンロード",
           replyBtn: "あなたの周波数を返す",
@@ -661,9 +801,10 @@
           audioDesc: "Headphones recommended to feel the low end braided with chimes.",
           vizStart: "Enable visualizer",
           vizReady: "Visualizer enabled",
-          vizFail: "Visualizer unavailable",
           pulseOn: "Interactive glow:On",
           pulseOff: "Interactive glow:Off",
+          fireworkOn: "Fireworks:On",
+          fireworkOff: "Fireworks:Off",
           vizHint: "Play the track and move your cursor to steer the light.",
           downloadBtn: "Download audio",
           replyBtn: "Send your own frequency",
@@ -675,20 +816,21 @@
       const translatableElements = document.querySelectorAll("[data-i18n]");
       const vizToggle = document.getElementById("vizToggle");
       const pulseToggle = document.getElementById("pulseToggle");
+      const fireworkToggle = document.getElementById("fireworkToggle");
       const audio = document.getElementById("greetingAudio");
       const canvas = document.getElementById("vizCanvas");
-      const visualizer = document.getElementById("visualizer");
+      const vizOverlay = document.getElementById("vizOverlay");
       const ctx = canvas.getContext("2d");
 
       let currentLang = localStorage.getItem("newYearLang") || "zh";
-      let vizState = "start";
+      let vizEnabled = false;
       let pulseEnabled = true;
+      let fireworksEnabled = true;
       let audioCtx;
       let analyser;
       let dataArray;
       let source;
       let rafId;
-      let canvasSize = { width: 0, height: 0 };
       let pointer = { x: 0.5, y: 0.5 };
 
       function setLanguage(lang) {
@@ -708,28 +850,21 @@
 
       function updateControlLabels() {
         const pack = translations[currentLang];
-        if (!pack) return;
-        if (vizState === "ready") {
-          vizToggle.textContent = pack.vizReady;
-        } else if (vizState === "fail") {
-          vizToggle.textContent = pack.vizFail;
-        } else {
-          vizToggle.textContent = pack.vizStart;
-        }
-        pulseToggle.textContent = pulseEnabled ? pack.pulseOn : pack.pulseOff;
+        vizToggle.querySelector('span').textContent = vizEnabled ? pack.vizReady : pack.vizStart;
+        pulseToggle.querySelector('span').textContent = pulseEnabled ? pack.pulseOn : pack.pulseOff;
+        fireworkToggle.querySelector('span').textContent = fireworksEnabled ? pack.fireworkOn : pack.fireworkOff;
       }
 
       function resizeCanvas() {
-        const rect = visualizer.getBoundingClientRect();
+        const rect = canvas.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
-        canvasSize = { width: rect.width, height: rect.height };
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
       function initVisualizer() {
-        if (audioCtx || vizState === "fail") return;
+        if (audioCtx) return;
         try {
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           analyser = audioCtx.createAnalyser();
@@ -738,107 +873,138 @@
           source = audioCtx.createMediaElementSource(audio);
           source.connect(analyser);
           analyser.connect(audioCtx.destination);
-          vizState = "ready";
+          vizEnabled = true;
           vizToggle.classList.add("active");
           updateControlLabels();
         } catch (error) {
-          vizState = "fail";
-          vizToggle.classList.remove("active");
-          updateControlLabels();
+          console.error("Visualizer init failed:", error);
         }
       }
 
       function drawVisualizer(timestamp) {
-        if (!canvasSize.width) return;
-        const { width, height } = canvasSize;
+        const width = canvas.width / (window.devicePixelRatio || 1);
+        const height = canvas.height / (window.devicePixelRatio || 1);
+
         ctx.clearRect(0, 0, width, height);
 
-        // 背景渐变
-        const bgGradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 2);
-        bgGradient.addColorStop(0, 'rgba(20, 10, 5, 0.9)');
-        bgGradient.addColorStop(1, 'rgba(10, 5, 8, 0.95)');
-        ctx.fillStyle = bgGradient;
+        // Background gradient
+        const bgGrad = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 2);
+        bgGrad.addColorStop(0, 'rgba(30, 15, 10, 0.95)');
+        bgGrad.addColorStop(1, 'rgba(10, 5, 8, 0.98)');
+        ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, width, height);
 
-        let energy = 0.2;
+        let energy = 0.25;
         if (analyser && dataArray) {
           analyser.getByteFrequencyData(dataArray);
-          const sum = dataArray.reduce((acc, val) => acc + val, 0);
-          energy = sum / (dataArray.length * 255);
+          energy = dataArray.reduce((a, b) => a + b, 0) / (dataArray.length * 255);
         } else {
-          energy = 0.25 + 0.1 * Math.sin(timestamp / 700);
+          energy = 0.25 + 0.1 * Math.sin(timestamp / 800);
         }
 
-        // 互动光场
+        // Interactive glow
         if (pulseEnabled) {
-          const glowRadius = Math.min(width, height) * (0.3 + energy * 0.4);
-          const glowX = width * pointer.x;
-          const glowY = height * pointer.y;
-          const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, glowRadius);
-          glow.addColorStop(0, `rgba(246, 211, 101, ${0.4 + energy * 0.5})`);
-          glow.addColorStop(0.5, `rgba(253, 160, 133, ${0.2 + energy * 0.3})`);
-          glow.addColorStop(1, "rgba(10, 5, 8, 0)");
+          const glowSize = Math.min(width, height) * (0.35 + energy * 0.5);
+          const gx = width * pointer.x;
+          const gy = height * pointer.y;
+          const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, glowSize);
+          glow.addColorStop(0, `rgba(246, 211, 101, ${0.5 + energy * 0.5})`);
+          glow.addColorStop(0.4, `rgba(253, 160, 133, ${0.3 + energy * 0.4})`);
+          glow.addColorStop(1, "transparent");
           ctx.fillStyle = glow;
           ctx.fillRect(0, 0, width, height);
         }
 
-        // 绘制音频条
-        const bars = 48;
+        // Audio bars
+        const bars = 56;
         const barWidth = width / bars;
         const gradient = ctx.createLinearGradient(0, height, 0, 0);
         gradient.addColorStop(0, '#f6d365');
         gradient.addColorStop(0.5, '#fda085');
         gradient.addColorStop(1, '#ffb6a3');
 
-        for (let i = 0; i < bars; i += 1) {
-          let value = energy * 0.6;
-          if (dataArray) {
-            value = dataArray[i] / 255;
-          } else {
-            value = 0.25 + 0.12 * Math.sin(timestamp / 400 + i * 0.5);
-          }
-          const barHeight = Math.max(8, value * height * 0.7);
-          const x = i * barWidth + barWidth * 0.15;
-          const y = height - barHeight - 20;
+        for (let i = 0; i < bars; i++) {
+          let value = dataArray ? dataArray[i] / 255 : 0.3 + 0.15 * Math.sin(timestamp / 500 + i * 0.5);
+          const barHeight = Math.max(10, value * height * 0.75);
+          const x = i * barWidth + barWidth * 0.1;
+          const y = height - barHeight - 15;
 
           ctx.fillStyle = gradient;
-          ctx.fillRect(x, y, barWidth * 0.7, barHeight);
+          ctx.fillRect(x, y, barWidth * 0.8, barHeight);
 
-          // 发光效果
-          ctx.shadowBlur = 20;
+          ctx.shadowBlur = 25;
           ctx.shadowColor = '#f6d365';
-          ctx.fillRect(x, y, barWidth * 0.7, barHeight);
+          ctx.fillRect(x, y, barWidth * 0.8, barHeight);
           ctx.shadowBlur = 0;
         }
 
-        // 波浪线
-        ctx.strokeStyle = `rgba(246, 211, 101, ${0.4 + energy * 0.4})`;
+        // Wave
+        ctx.strokeStyle = `rgba(246, 211, 101, ${0.5 + energy * 0.4})`;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        const waveAmplitude = 12 + energy * 35;
+        const amp = 15 + energy * 40;
         for (let x = 0; x <= width; x += 8) {
-          const y = height * 0.65 + Math.sin(timestamp / 500 + x / 40) * waveAmplitude;
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+          const y = height * 0.7 + Math.sin(timestamp / 600 + x / 45) * amp;
+          x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         }
         ctx.stroke();
 
         rafId = requestAnimationFrame(drawVisualizer);
       }
 
-      visualizer.addEventListener("pointermove", (event) => {
-        const rect = visualizer.getBoundingClientRect();
-        pointer = {
-          x: Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1),
-          y: Math.min(Math.max((event.clientY - rect.top) / rect.height, 0), 1)
-        };
+      // Particle rain
+      function createParticleRain() {
+        const container = document.getElementById("particleRain");
+        for (let i = 0; i < 50; i++) {
+          const particle = document.createElement("div");
+          particle.className = "golden-particle";
+          particle.style.left = Math.random() * 100 + "%";
+          particle.style.animationDuration = (Math.random() * 10 + 8) + "s";
+          particle.style.animationDelay = Math.random() * 5 + "s";
+          container.appendChild(particle);
+        }
+      }
+
+      // Fireworks
+      function createFirework(x, y) {
+        const container = document.getElementById("fireworks");
+        const count = 20;
+        for (let i = 0; i < count; i++) {
+          const firework = document.createElement("div");
+          firework.className = "firework";
+          firework.style.left = x + "px";
+          firework.style.top = y + "px";
+          const angle = (Math.PI * 2 * i) / count;
+          const distance = 80 + Math.random() * 40;
+          firework.style.setProperty("--tx", Math.cos(angle) * distance + "px");
+          firework.style.setProperty("--ty", Math.sin(angle) * distance + "px");
+          container.appendChild(firework);
+          setTimeout(() => firework.remove(), 2000);
+        }
+      }
+
+      let fireworkInterval;
+      function startFireworks() {
+        if (fireworkInterval) return;
+        fireworkInterval = setInterval(() => {
+          if (fireworksEnabled && audio.currentTime > 0 && !audio.paused) {
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            createFirework(x, y);
+          }
+        }, 1500);
+      }
+
+      canvas.addEventListener("pointermove", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        pointer.x = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+        pointer.y = Math.min(Math.max((e.clientY - rect.top) / rect.height, 0), 1);
       });
 
       vizToggle.addEventListener("click", () => {
-        if (vizState === "ready") return;
-        initVisualizer();
-        if (audioCtx && audioCtx.state === "suspended") {
-          audioCtx.resume();
+        if (!vizEnabled) {
+          initVisualizer();
+          if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
         }
       });
 
@@ -848,21 +1014,27 @@
         updateControlLabels();
       });
 
+      fireworkToggle.addEventListener("click", () => {
+        fireworksEnabled = !fireworksEnabled;
+        fireworkToggle.classList.toggle("active", fireworksEnabled);
+        updateControlLabels();
+      });
+
       audio.addEventListener("play", () => {
-        if (!audioCtx && vizState !== "fail") {
+        if (!vizEnabled) {
           initVisualizer();
         }
-        if (audioCtx && audioCtx.state === "suspended") {
-          audioCtx.resume();
-        }
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        vizOverlay.classList.add("hidden");
+        startFireworks();
       });
 
       window.addEventListener("resize", resizeCanvas);
+      langButtons.forEach((btn) => btn.addEventListener("click", () => setLanguage(btn.dataset.lang)));
 
       resizeCanvas();
       drawVisualizer(0);
-
-      langButtons.forEach((btn) => btn.addEventListener("click", () => setLanguage(btn.dataset.lang)));
+      createParticleRain();
       setLanguage(currentLang);
     </script>
   </body>
